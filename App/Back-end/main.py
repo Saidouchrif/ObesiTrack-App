@@ -11,6 +11,10 @@ class UserSignup(BaseModel):
     email: str
     name: str
     password: str
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
 
 @app.get("/")
 def read_root():
@@ -21,5 +25,5 @@ def signup(user: UserSignup):
     return create_user(user.email, user.name, user.password)
 
 @app.post('/login')
-def login(user: UserSignup):
+def login(user: UserLogin):
     return authenticate_user(user.email, user.password)
