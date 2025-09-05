@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import sys
 import os
@@ -16,10 +17,20 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
+templates = Jinja2Templates(directory='../Front-end/src')
 
 @app.get("/")
-def read_root():
-    return {"message": "Welcome to the ObesiTrack API"}
+def read_root(request: Request):
+    return templates.TemplateResponse("Home.html", {"request": request})
+
+@app.get("/login")
+def login_page(request: Request):
+    return templates.TemplateResponse("Login.html", {"request": request})
+
+@app.get("/register")
+def register_page(request: Request):
+    return templates.TemplateResponse("Register.html", {"request": request})
+
 
 @app.post("/signup")
 def signup(user: UserSignup):

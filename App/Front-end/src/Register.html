@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription - ObesiTrack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+    .step-indicator { transition: all 0.3s ease; }
+    .step-active { background: rgba(255, 255, 255, 0.2); }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+  <!-- Background Pattern -->
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-white opacity-10 rounded-full"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-white opacity-10 rounded-full"></div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white opacity-5 rounded-full"></div>
+  </div>
+
+  <!-- Register Card -->
+  <div class="relative w-full max-w-lg">
+    <!-- Back to Home Button -->
+    <div class="mb-6">
+      <a href="/" class="inline-flex items-center text-white hover:text-gray-200 transition duration-300">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Retour à l'accueil
+      </a>
+    </div>
+
+    <!-- Main Card -->
+    <div class="glass-effect rounded-2xl shadow-2xl p-8 border border-white/20">
+      <!-- Logo and Title -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4">
+          <i class="fas fa-user-plus text-2xl text-white"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-white mb-2">Créer un compte</h1>
+        <p class="text-white/80">Rejoignez ObesiTrack dès aujourd'hui</p>
+      </div>
+
+      <!-- Progress Steps -->
+      <div class="flex justify-center mb-8">
+        <div class="flex space-x-4">
+          <div class="step-indicator step-active w-8 h-8 rounded-full border-2 border-white/30 flex items-center justify-center text-white text-sm font-semibold">1</div>
+          <div class="w-8 h-1 bg-white/20 rounded mt-4"></div>
+          <div class="step-indicator w-8 h-8 rounded-full border-2 border-white/30 flex items-center justify-center text-white/60 text-sm font-semibold">2</div>
+        </div>
+      </div>
+
+      <!-- Register Form -->
+      <form id="registerForm" class="space-y-6">
+        <!-- Step 1: Personal Information -->
+        <div id="step1" class="space-y-6">
+          <h3 class="text-lg font-semibold text-white mb-4">
+            <i class="fas fa-user mr-2"></i>Informations personnelles
+          </h3>
+          
+          <!-- Full Name -->
+          <div>
+            <label class="block text-sm font-medium text-white mb-2">
+              <i class="fas fa-id-card mr-2"></i>Nom complet
+            </label>
+            <input 
+              type="text" 
+              id="fullName" 
+              class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition duration-300" 
+              placeholder="Votre nom complet"
+              required
+            >
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label class="block text-sm font-medium text-white mb-2">
+              <i class="fas fa-envelope mr-2"></i>Adresse email
+            </label>
+            <input 
+              type="email" 
+              id="email" 
+              class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition duration-300" 
+              placeholder="votre@email.com"
+              required
+            >
+          </div>
+
+        </div>
+
+        <!-- Step 2: Security -->
+        <div id="step2" class="space-y-6 hidden">
+          <h3 class="text-lg font-semibold text-white mb-4">
+            <i class="fas fa-shield-alt mr-2"></i>Sécurité du compte
+          </h3>
+          
+          <!-- Password -->
+          <div>
+            <label class="block text-sm font-medium text-white mb-2">
+              <i class="fas fa-lock mr-2"></i>Mot de passe
+            </label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="password" 
+                class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition duration-300 pr-12" 
+                placeholder="••••••••"
+                required
+              >
+              <button 
+                type="button" 
+                onclick="togglePassword('password')" 
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition duration-300"
+              >
+                <i id="passwordIcon" class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="mt-2 text-xs text-white/60">
+              <div class="flex items-center">
+                <i class="fas fa-info-circle mr-1"></i>
+                Minimum 8 caractères avec lettres et chiffres
+              </div>
+            </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div>
+            <label class="block text-sm font-medium text-white mb-2">
+              <i class="fas fa-lock mr-2"></i>Confirmer le mot de passe
+            </label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="confirmPassword" 
+                class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition duration-300 pr-12" 
+                placeholder="••••••••"
+                required
+              >
+              <button 
+                type="button" 
+                onclick="togglePassword('confirmPassword')" 
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition duration-300"
+              >
+                <i id="confirmPasswordIcon" class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Terms and Conditions -->
+          <div class="flex items-start">
+            <input 
+              type="checkbox" 
+              id="terms" 
+              class="mt-1 rounded border-white/20 bg-white/10 text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
+              required
+            >
+            <label for="terms" class="ml-3 text-sm text-white/80">
+              J'accepte les 
+              <a href="#" class="text-white hover:text-gray-200 underline">conditions d'utilisation</a> 
+              et la 
+              <a href="#" class="text-white hover:text-gray-200 underline">politique de confidentialité</a>
+            </label>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between pt-6">
+          <button 
+            type="button" 
+            id="prevBtn" 
+            onclick="changeStep(-1)" 
+            class="hidden px-6 py-2 text-white border border-white/30 rounded-lg hover:bg-white/10 transition duration-300"
+          >
+            <i class="fas fa-arrow-left mr-2"></i>Précédent
+          </button>
+          
+          <button 
+            type="button" 
+            id="nextBtn" 
+            onclick="changeStep(1)" 
+            class="ml-auto px-6 py-2 bg-white/20 text-white border border-white/30 rounded-lg hover:bg-white/30 transition duration-300"
+          >
+            Suivant<i class="fas fa-arrow-right ml-2"></i>
+          </button>
+          
+          <button 
+            type="submit" 
+            id="submitBtn" 
+            class="hidden w-full bg-white text-blue-600 py-3 px-4 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50"
+          >
+            <i class="fas fa-user-plus mr-2"></i>
+            Créer mon compte
+          </button>
+        </div>
+
+        <!-- Login Link -->
+        <div class="text-center pt-4">
+          <p class="text-white/80">
+            Déjà un compte ? 
+            <a href="/login" class="text-white font-semibold hover:text-gray-200 transition duration-300">
+              Se connecter
+            </a>
+          </p>
+        </div>
+      </form>
+
+      <!-- Loading Overlay -->
+      <div id="loadingOverlay" class="hidden absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
+        <div class="text-center text-white">
+          <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
+          <p>Création du compte...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Benefits -->
+    <div class="mt-8 text-center">
+      <p class="text-white/60 text-sm mb-4">Pourquoi choisir ObesiTrack ?</p>
+      <div class="grid grid-cols-3 gap-4 text-white/60">
+        <div class="text-center">
+          <i class="fas fa-brain text-2xl mb-2"></i>
+          <div class="text-xs">IA Avancée</div>
+        </div>
+        <div class="text-center">
+          <i class="fas fa-shield-alt text-2xl mb-2"></i>
+          <div class="text-xs">Sécurisé</div>
+        </div>
+        <div class="text-center">
+          <i class="fas fa-chart-line text-2xl mb-2"></i>
+          <div class="text-xs">Analytics</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    const totalSteps = 2;
+
+    // Toggle password visibility
+    function togglePassword(inputId) {
+      const passwordInput = document.getElementById(inputId);
+      const iconId = inputId + 'Icon';
+      const passwordIcon = document.getElementById(iconId);
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        passwordIcon.classList.remove('fa-eye');
+        passwordIcon.classList.add('fa-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        passwordIcon.classList.remove('fa-eye-slash');
+        passwordIcon.classList.add('fa-eye');
+      }
+    }
+
+    // Change step
+    function changeStep(direction) {
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const submitBtn = document.getElementById('submitBtn');
+      const steps = document.querySelectorAll('.step-indicator');
+
+      currentStep += direction;
+
+      if (currentStep === 1) {
+        step1.classList.remove('hidden');
+        step2.classList.add('hidden');
+        prevBtn.classList.add('hidden');
+        nextBtn.classList.remove('hidden');
+        submitBtn.classList.add('hidden');
+        steps[0].classList.add('step-active');
+        steps[1].classList.remove('step-active');
+      } else if (currentStep === 2) {
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+        prevBtn.classList.remove('hidden');
+        nextBtn.classList.add('hidden');
+        submitBtn.classList.remove('hidden');
+        steps[0].classList.remove('step-active');
+        steps[1].classList.add('step-active');
+      }
+    }
+
+    // Form submission
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const fullName = document.getElementById('fullName').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const terms = document.getElementById('terms').checked;
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      
+      // Validation
+      if (password !== confirmPassword) {
+        showNotification('Les mots de passe ne correspondent pas', 'error');
+        return;
+      }
+      
+      if (!terms) {
+        showNotification('Veuillez accepter les conditions d\'utilisation', 'error');
+        return;
+      }
+      
+      // Show loading
+      loadingOverlay.classList.remove('hidden');
+      
+      try {
+        const response = await fetch('http://localhost:7777/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: fullName,
+            email: email,
+            password: password,
+            role: "user"
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showNotification('Compte créé avec succès !', 'success');
+          
+          // Redirect to login page
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 2000);
+        } else {
+          showNotification('Erreur lors de la création: ' + data.detail, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur lors de la création: ' + error.message, 'error');
+      } finally {
+        loadingOverlay.classList.add('hidden');
+      }
+    });
+
+    // Notification system
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+      }`;
+      notification.innerHTML = `
+        <div class="flex items-center">
+          <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+
+    // Check if user is already logged in
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        window.location.href = '/';
+      }
+    });
+  </script>
+</body>
+</html>

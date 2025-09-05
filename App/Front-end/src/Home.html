@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ObesiTrack - Prédiction d'Obésité par IA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <i class="fas fa-heartbeat text-3xl text-blue-600 mr-3"></i>
+            <h1 class="text-2xl font-bold text-gray-900">ObesiTrack</h1>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="#features" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Fonctionnalités</a>
+          <a href="#api" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">API</a>
+          <a href="/login" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Connexion</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="gradient-bg pt-20 pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
+          Prédiction d'Obésité par
+          <span class="text-yellow-300">Intelligence Artificielle</span>
+  </h1>
+        <p class="text-xl text-gray-200 mb-8 max-w-3xl mx-auto">
+          ObesiTrack utilise des modèles de Machine Learning avancés pour prédire les catégories d'obésité 
+          et fournir des recommandations personnalisées pour une meilleure santé.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/login" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 text-center">
+            <i class="fas fa-sign-in-alt mr-2"></i>Se Connecter
+          </a>
+          <a href="/register" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition duration-300 text-center">
+            <i class="fas fa-user-plus mr-2"></i>S'inscrire
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Fonctionnalités Principales</h2>
+        <p class="text-xl text-gray-600">Découvrez les capacités avancées d'ObesiTrack</p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="card-hover bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+          <div class="text-center">
+            <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-brain text-2xl text-blue-600"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">IA Avancée</h3>
+            <p class="text-gray-600">Modèles de Machine Learning multiclasse pour une prédiction précise des catégories d'obésité</p>
+          </div>
+        </div>
+
+        <div class="card-hover bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+          <div class="text-center">
+            <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-shield-alt text-2xl text-green-600"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Sécurisé</h3>
+            <p class="text-gray-600">Authentification JWT pour protéger vos données et garantir la confidentialité</p>
+          </div>
+        </div>
+
+        <div class="card-hover bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+          <div class="text-center">
+            <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-chart-line text-2xl text-purple-600"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-3">Analytics</h3>
+            <p class="text-gray-600">Analyses détaillées avec probabilités et recommandations personnalisées</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- API Section -->
+  <section id="api" class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Documentation API</h2>
+        <p class="text-xl text-gray-600">Intégrez ObesiTrack dans vos applications</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="bg-gray-50 p-6 rounded-xl">
+          <h3 class="text-xl font-semibold text-gray-900 mb-4">Endpoints Principaux</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-white rounded-lg">
+              <span class="font-mono text-sm">POST /login</span>
+              <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Auth</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-white rounded-lg">
+              <span class="font-mono text-sm">POST /predict</span>
+              <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">ML</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-white rounded-lg">
+              <span class="font-mono text-sm">GET /model/status</span>
+              <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Info</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 p-6 rounded-xl">
+          <h3 class="text-xl font-semibold text-gray-900 mb-4">Démarrage Rapide</h3>
+          <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+            <div># Connexion</div>
+            <div>curl -X POST "http://localhost:7777/login" \</div>
+            <div class="ml-4">-H "Content-Type: application/json" \</div>
+            <div class="ml-4">-d '{"email": "user@example.com", "password": "password"}'</div>
+            <br>
+            <div># Prédiction</div>
+            <div>curl -X POST "http://localhost:8000/predict" \</div>
+            <div class="ml-4">-H "Authorization: Bearer TOKEN"</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-8">
+        <a href="http://localhost:8000/docs" target="_blank" class="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+          <i class="fas fa-book mr-2"></i>Documentation Complète
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="py-16 bg-blue-600">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8 text-center text-white">
+        <div>
+          <div class="text-4xl font-bold mb-2">7</div>
+          <div class="text-blue-200">Catégories d'Obésité</div>
+        </div>
+        <div>
+          <div class="text-4xl font-bold mb-2">95%+</div>
+          <div class="text-blue-200">Précision du Modèle</div>
+        </div>
+        <div>
+          <div class="text-4xl font-bold mb-2">16</div>
+          <div class="text-blue-200">Variables d'Analyse</div>
+        </div>
+        <div>
+          <div class="text-4xl font-bold mb-2">24/7</div>
+          <div class="text-blue-200">Disponibilité API</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="flex items-center mb-4 md:mb-0">
+          <i class="fas fa-heartbeat text-2xl text-blue-400 mr-3"></i>
+          <span class="text-xl font-bold">ObesiTrack</span>
+        </div>
+        <div class="text-gray-400 text-center md:text-right">
+          <p>&copy; 2024 ObesiTrack. Tous droits réservés.</p>
+          <p class="text-sm mt-1">Prédiction d'obésité par Intelligence Artificielle</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function scrollToSection(sectionId) {
+      document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Update login state in UI
+    function updateLoginState() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        // Update navigation to show user info
+        const nav = document.querySelector('nav .flex.items-center.space-x-4');
+        nav.innerHTML = `
+          <a href="#features" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Fonctionnalités</a>
+          <a href="#api" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">API</a>
+          <span class="text-gray-700 px-3 py-2 text-sm">Bonjour ${user.name}</span>
+          <button onclick="logout()" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Déconnexion</button>
+        `;
+      }
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      location.reload();
+    }
+
+    // Check if user is already logged in on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      updateLoginState();
+    });
+  </script>
+</body>
+</html>
