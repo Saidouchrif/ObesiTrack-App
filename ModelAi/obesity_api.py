@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, validator
 from typing import Literal, Optional
 from enum import Enum
@@ -14,7 +15,49 @@ from sklearn.metrics import accuracy_score, classification_report
 import joblib
 import os
 import warnings
+import jwt
+from jwt.exceptions import InvalidTokenError
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
 warnings.filterwarnings('ignore')
+
+# Chargement des variables d'environnement
+load_dotenv()
+
+# Configuration JWT
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+# Schéma de sécurité
+security = HTTPBearer()
+
+# ==================== FONCTIONS D'AUTHENTIFICATION JWT ====================
+
+def verify_token(token: str):
+    """Vérifie et décode un token JWT"""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(
+                status_code=401,
+                detail="Token invalide",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return email
+    except InvalidTokenError:
+        raise HTTPException(
+            status_code=401,
+            detail="Token invalide",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Dépendance pour obtenir l'utilisateur actuel à partir du token JWT"""
+    token = credentials.credentials
+    email = verify_token(token)
+    return {"email": email}
 
 # ==================== MODÈLES PYDANTIC ====================
 
@@ -452,10 +495,17 @@ async def root():
         "version": "1.0.0",
         "status": "active",
         "endpoints": {
-            "prediction": "/predict",
-            "model_status": "/model/status",
-            "health_check": "/health",
-            "documentation": "/docs"
+            "prediction": "/predict (🔒 JWT Required)",
+            "model_status": "/model/status (🔒 JWT Required)",
+            "sample_prediction": "/predict/sample (🔒 JWT Required)",
+            "user_info": "/user/info (🔒 JWT Required)",
+            "health_check": "/health (Public)",
+            "documentation": "/docs (Public)"
+        },
+        "authentication": {
+            "type": "JWT Bearer Token",
+            "header": "Authorization: Bearer <token>",
+            "login_endpoint": "http://localhost:7777/login"
         }
     }
 
@@ -483,9 +533,18 @@ async def health_check():
             "predictor_loaded": False
         }
 
+@app.get("/user/info", tags=["User"])
+async def get_user_info(current_user: dict = Depends(get_current_user)):
+    """Obtenir les informations de l'utilisateur connecté (Protégé par JWT)"""
+    return {
+        "message": "Utilisateur authentifié",
+        "user": current_user,
+        "authenticated": True
+    }
+
 @app.get("/model/status", response_model=ModelStatusResponse, tags=["Model"])
-async def get_model_status():
-    """Obtenir le statut et les informations du modèle ML"""
+async def get_model_status(current_user: dict = Depends(get_current_user)):
+    """Obtenir le statut et les informations du modèle ML (Protégé par JWT)"""
     try:
         global predictor
         if predictor is None:
@@ -510,9 +569,9 @@ async def get_model_status():
         )
 
 @app.post("/predict", response_model=ObesityPredictionResponse, tags=["Prediction"])
-async def predict_obesity(request: ObesityPredictionRequest):
+async def predict_obesity(request: ObesityPredictionRequest, current_user: dict = Depends(get_current_user)):
     """
-    Prédit la catégorie d'obésité basée sur les caractéristiques fournies
+    Prédit la catégorie d'obésité basée sur les caractéristiques fournies (Protégé par JWT)
     
     Cette endpoint utilise un modèle de machine learning entraîné pour prédire
     la catégorie d'obésité d'une personne basée sur ses caractéristiques
@@ -567,9 +626,9 @@ async def predict_obesity(request: ObesityPredictionRequest):
         )
 
 @app.get("/predict/sample", response_model=ObesityPredictionResponse, tags=["Prediction"])
-async def predict_sample():
+async def predict_sample(current_user: dict = Depends(get_current_user)):
     """
-    Exemple de prédiction avec des données d'exemple
+    Exemple de prédiction avec des données d'exemple (Protégé par JWT)
     """
     sample_data = ObesityPredictionRequest(
         Gender="Male",
