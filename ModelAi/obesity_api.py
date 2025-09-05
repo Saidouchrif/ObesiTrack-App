@@ -598,5 +598,5 @@ if __name__ == "__main__":
     print("📊 Port: 8000")
     print("📖 Documentation: http://localhost:8000/docs")
     print("=" * 50)
-    
+
     uvicorn.run("obesity_api:app", host="0.0.0.0", port=8000, reload=True)
