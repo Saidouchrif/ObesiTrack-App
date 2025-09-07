@@ -203,9 +203,9 @@
           // Show success message
           showNotification('Connexion réussie !', 'success');
           
-          // Redirect to dashboard or home
+          // Redirect to dashboard
           setTimeout(() => {
-            window.location.href = '/';
+            window.location.href = '/dashboard';
           }, 1500);
         } else {
           showNotification('Erreur de connexion: ' + data.detail, 'error');
@@ -241,7 +241,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       const token = localStorage.getItem('token');
       if (token) {
-        window.location.href = '/';
+        window.location.href = '/dashboard';
       }
     });
   </script>

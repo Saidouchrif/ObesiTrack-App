@@ -206,8 +206,20 @@
         nav.innerHTML = `
           <a href="#features" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Fonctionnalités</a>
           <a href="#api" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">API</a>
+          <a href="/predict" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Prédiction IA</a>
           <span class="text-gray-700 px-3 py-2 text-sm">Bonjour ${user.name}</span>
           <button onclick="logout()" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Déconnexion</button>
+        `;
+        
+        // Update hero section buttons for logged in users
+        const heroButtons = document.querySelector('.flex.flex-col.sm\\:flex-row.gap-4.justify-center');
+        heroButtons.innerHTML = `
+          <a href="/predict" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300 text-center">
+            <i class="fas fa-brain mr-2"></i>Prédiction IA
+          </a>
+          <a href="#api" onclick="scrollToSection('api')" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition duration-300 text-center">
+            <i class="fas fa-code mr-2"></i>Documentation API
+          </a>
         `;
       }
     }
@@ -221,6 +233,12 @@
 
     // Check if user is already logged in on page load
     document.addEventListener('DOMContentLoaded', function() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        // Redirect logged in users to dashboard
+        window.location.href = '/dashboard';
+        return;
+      }
       updateLoginState();
     });
   </script>

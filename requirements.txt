@@ -25,3 +25,6 @@ pydantic==2.5.0
 
 # CORS
 python-multipart==0.0.6
+
+# HTTP requests
+requests==2.31.0

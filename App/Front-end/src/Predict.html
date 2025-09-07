@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prédiction d'Obésité - ObesiTrack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+    .form-section { background: rgba(255, 255, 255, 0.95); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <i class="fas fa-heartbeat text-3xl text-blue-600 mr-3"></i>
+            <h1 class="text-2xl font-bold text-gray-900">ObesiTrack</h1>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="/" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Accueil</a>
+          <span id="userInfo" class="text-gray-700 px-3 py-2 text-sm"></span>
+          <button onclick="logout()" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Déconnexion</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">
+        <i class="fas fa-brain text-blue-600 mr-3"></i>
+        Prédiction d'Obésité par IA
+      </h1>
+      <p class="text-xl text-gray-600">Analysez votre profil de santé avec notre modèle de Machine Learning</p>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-8">
+      <!-- Form Section -->
+      <div class="form-section rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+          <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
+          Informations de Santé
+        </h2>
+
+        <form id="predictionForm" class="space-y-6">
+          <!-- Personal Information -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-venus-mars mr-1"></i>Genre
+              </label>
+              <select id="Gender" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Sélectionner</option>
+                <option value="Male">Homme</option>
+                <option value="Female">Femme</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-birthday-cake mr-1"></i>Âge
+              </label>
+              <input type="number" id="Age" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="25" min="1" max="120" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-ruler-vertical mr-1"></i>Taille (m)
+              </label>
+              <input type="number" id="Height" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="1.75" min="0.5" max="3.0" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-weight mr-1"></i>Poids (kg)
+              </label>
+              <input type="number" id="Weight" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="80.0" min="10" max="300" required>
+            </div>
+          </div>
+
+          <!-- Family History -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-family mr-1"></i>Antécédents familiaux de surpoids
+            </label>
+            <select id="family_history_with_overweight" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+              <option value="">Sélectionner</option>
+              <option value="yes">Oui</option>
+              <option value="no">Non</option>
+            </select>
+          </div>
+
+          <!-- Eating Habits -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-hamburger mr-1"></i>Consommation fréquente d'aliments caloriques
+              </label>
+              <select id="FAVC" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Sélectionner</option>
+                <option value="yes">Oui</option>
+                <option value="no">Non</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-carrot mr-1"></i>Fréquence de consommation de légumes (1-3)
+              </label>
+              <input type="number" id="FCVC" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="2.0" min="1" max="3" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-utensils mr-1"></i>Nombre de repas principaux (1-4)
+              </label>
+              <input type="number" id="NCP" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="3.0" min="1" max="4" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-apple-alt mr-1"></i>Consommation d'aliments entre les repas
+              </label>
+              <select id="CAEC" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Sélectionner</option>
+                <option value="no">Non</option>
+                <option value="Sometimes">Parfois</option>
+                <option value="Frequently">Fréquemment</option>
+                <option value="Always">Toujours</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Lifestyle -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-smoking mr-1"></i>Fumeur
+              </label>
+              <select id="SMOKE" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Sélectionner</option>
+                <option value="yes">Oui</option>
+                <option value="no">Non</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-tint mr-1"></i>Consommation d'eau (1-3)
+              </label>
+              <input type="number" id="CH2O" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="2.0" min="1" max="3" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-chart-line mr-1"></i>Surveillance des calories
+              </label>
+              <select id="SCC" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Sélectionner</option>
+                <option value="yes">Oui</option>
+                <option value="no">Non</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-running mr-1"></i>Activité physique (0-3)
+              </label>
+              <input type="number" id="FAF" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="1.0" min="0" max="3" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-tv mr-1"></i>Temps devant les écrans (0-2)
+              </label>
+              <input type="number" id="TUE" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.0" min="0" max="2" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-wine-glass mr-1"></i>Consommation d'alcool
+              </label>
+              <select id="CALC" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Sélectionner</option>
+                <option value="no">Non</option>
+                <option value="Sometimes">Parfois</option>
+                <option value="Frequently">Fréquemment</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-bus mr-1"></i>Moyen de transport
+            </label>
+            <select id="MTRANS" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+              <option value="">Sélectionner</option>
+              <option value="Public_Transportation">Transport public</option>
+              <option value="Walking">Marche</option>
+              <option value="Bike">Vélo</option>
+              <option value="Motorbike">Moto</option>
+              <option value="Automobile">Voiture</option>
+            </select>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i class="fas fa-brain mr-2"></i>
+            Analyser avec l'IA
+          </button>
+        </form>
+      </div>
+
+      <!-- Results Section -->
+      <div class="form-section rounded-2xl shadow-xl p-8">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-semibold text-gray-900">
+            <i class="fas fa-chart-pie text-green-600 mr-2"></i>
+            Résultats de l'Analyse
+          </h2>
+          <button onclick="loadUserPredictions()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            <i class="fas fa-history mr-1"></i>Historique
+          </button>
+        </div>
+
+        <div id="results" class="text-center text-gray-500">
+          <i class="fas fa-arrow-left text-6xl mb-4"></i>
+          <p class="text-lg">Remplissez le formulaire pour voir votre analyse personnalisée</p>
+          <p class="text-sm mt-2">Notre IA analysera vos données et vous fournira des recommandations</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-2xl p-8 text-center">
+        <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i>
+        <p class="text-lg font-semibold">Analyse en cours...</p>
+        <p class="text-gray-600">Notre IA traite vos données</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check authentication
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user'));
+      
+      if (!token || !user) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      // Update user info
+      document.getElementById('userInfo').textContent = `Bonjour ${user.name}`;
+    });
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
+
+    // Form submission
+    document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const resultsDiv = document.getElementById('results');
+      
+      // Show loading
+      loadingOverlay.classList.remove('hidden');
+      
+      // Collect form data
+      const formData = {
+        Gender: document.getElementById('Gender').value,
+        Age: parseFloat(document.getElementById('Age').value),
+        Height: parseFloat(document.getElementById('Height').value),
+        Weight: parseFloat(document.getElementById('Weight').value),
+        family_history_with_overweight: document.getElementById('family_history_with_overweight').value,
+        FAVC: document.getElementById('FAVC').value,
+        FCVC: parseFloat(document.getElementById('FCVC').value),
+        NCP: parseFloat(document.getElementById('NCP').value),
+        CAEC: document.getElementById('CAEC').value,
+        SMOKE: document.getElementById('SMOKE').value,
+        CH2O: parseFloat(document.getElementById('CH2O').value),
+        SCC: document.getElementById('SCC').value,
+        FAF: parseFloat(document.getElementById('FAF').value),
+        TUE: parseFloat(document.getElementById('TUE').value),
+        CALC: document.getElementById('CALC').value,
+        MTRANS: document.getElementById('MTRANS').value
+      };
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:7777/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Display results
+          displayResults(data, formData);
+        } else {
+          showNotification('Erreur lors de l\'analyse: ' + data.detail, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion: ' + error.message, 'error');
+      } finally {
+        loadingOverlay.classList.add('hidden');
+      }
+    });
+
+    // Display results
+    function displayResults(data, formData) {
+      const resultsDiv = document.getElementById('results');
+      
+      // Calculate BMI
+      const bmi = (formData.Weight / (formData.Height * formData.Height)).toFixed(1);
+      
+      // Get prediction details
+      const prediction = data.prediction;
+      const probabilities = data.probabilities || {};
+      
+      // Define obesity categories with colors and descriptions
+      const categories = {
+        'Insufficient_Weight': { color: 'text-blue-600', bg: 'bg-blue-100', desc: 'Poids Insuffisant' },
+        'Normal_Weight': { color: 'text-green-600', bg: 'bg-green-100', desc: 'Poids Normal' },
+        'Overweight_Level_I': { color: 'text-yellow-600', bg: 'bg-yellow-100', desc: 'Surpoids Niveau I' },
+        'Overweight_Level_II': { color: 'text-orange-600', bg: 'bg-orange-100', desc: 'Surpoids Niveau II' },
+        'Obesity_Type_I': { color: 'text-red-600', bg: 'bg-red-100', desc: 'Obésité Type I' },
+        'Obesity_Type_II': { color: 'text-red-700', bg: 'bg-red-200', desc: 'Obésité Type II' },
+        'Obesity_Type_III': { color: 'text-red-800', bg: 'bg-red-300', desc: 'Obésité Type III' }
+      };
+      
+      const category = categories[prediction] || { color: 'text-gray-600', bg: 'bg-gray-100', desc: prediction };
+      
+      resultsDiv.innerHTML = `
+        <div class="space-y-6">
+          <!-- Main Prediction -->
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 ${category.bg} rounded-full mb-4">
+              <i class="fas fa-chart-line text-3xl ${category.color}"></i>
+            </div>
+            <h3 class="text-3xl font-bold ${category.color} mb-2">${category.desc}</h3>
+            <p class="text-gray-600">IMC calculé: ${bmi}</p>
+          </div>
+          
+          <!-- Probabilities -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="font-semibold text-gray-900 mb-3">Probabilités par catégorie:</h4>
+            <div class="space-y-2">
+              ${Object.entries(probabilities).map(([cat, prob]) => {
+                const catInfo = categories[cat] || { color: 'text-gray-600', desc: cat };
+                const percentage = (prob * 100).toFixed(1);
+                return `
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm ${catInfo.color}">${catInfo.desc}</span>
+                    <div class="flex items-center">
+                      <div class="w-24 bg-gray-200 rounded-full h-2 mr-2">
+                        <div class="h-2 rounded-full ${catInfo.bg}" style="width: ${percentage}%"></div>
+                      </div>
+                      <span class="text-sm font-medium">${percentage}%</span>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+          
+          <!-- Recommendations -->
+          <div class="bg-blue-50 rounded-lg p-4">
+            <h4 class="font-semibold text-blue-900 mb-3">
+              <i class="fas fa-lightbulb mr-2"></i>Recommandations
+            </h4>
+            <div class="text-sm text-blue-800 space-y-2">
+              ${getRecommendations(prediction, formData)}
+            </div>
+          </div>
+          
+          <!-- New Analysis Button -->
+          <div class="text-center">
+            <button onclick="document.getElementById('predictionForm').reset(); document.getElementById('results').innerHTML='<div class=\\"text-center text-gray-500\\"><i class=\\"fas fa-arrow-left text-6xl mb-4\\"></i><p class=\\"text-lg\\">Remplissez le formulaire pour voir votre analyse personnalisée</p><p class=\\"text-sm mt-2\\">Notre IA analysera vos données et vous fournira des recommandations</p></div>'" class="text-blue-600 hover:text-blue-800 font-medium">
+              <i class="fas fa-redo mr-1"></i>Nouvelle Analyse
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Get recommendations based on prediction
+    function getRecommendations(prediction, formData) {
+      const recommendations = [];
+      
+      if (prediction === 'Insufficient_Weight') {
+        recommendations.push('• Consultez un nutritionniste pour un plan alimentaire adapté');
+        recommendations.push('• Augmentez progressivement votre apport calorique');
+        recommendations.push('• Pratiquez des exercices de musculation');
+      } else if (prediction === 'Normal_Weight') {
+        recommendations.push('• Maintenez vos bonnes habitudes alimentaires');
+        recommendations.push('• Continuez une activité physique régulière');
+        recommendations.push('• Surveillez votre poids régulièrement');
+      } else if (prediction.includes('Overweight')) {
+        recommendations.push('• Réduisez votre apport calorique quotidien');
+        recommendations.push('• Augmentez votre activité physique');
+        recommendations.push('• Consultez un professionnel de santé');
+      } else if (prediction.includes('Obesity')) {
+        recommendations.push('• Consultez immédiatement un médecin');
+        recommendations.push('• Suivez un programme de perte de poids supervisé');
+        recommendations.push('• Modifiez radicalement votre mode de vie');
+      }
+      
+      // Add specific recommendations based on form data
+      if (formData.FAVC === 'yes') {
+        recommendations.push('• Réduisez la consommation d\'aliments caloriques');
+      }
+      if (formData.FAF < 1.5) {
+        recommendations.push('• Augmentez votre activité physique');
+      }
+      if (formData.CH2O < 2) {
+        recommendations.push('• Buvez plus d\'eau quotidiennement');
+      }
+      
+      return recommendations.join('<br>');
+    }
+
+    // Load user predictions history
+    async function loadUserPredictions() {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const resultsDiv = document.getElementById('results');
+      
+      loadingOverlay.classList.remove('hidden');
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:7777/predictions', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          displayPredictionsHistory(data.predictions);
+        } else {
+          showNotification('Erreur lors du chargement de l\'historique: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion: ' + error.message, 'error');
+      } finally {
+        loadingOverlay.classList.add('hidden');
+      }
+    }
+
+    // Display predictions history
+    function displayPredictionsHistory(predictions) {
+      const resultsDiv = document.getElementById('results');
+      
+      if (predictions.length === 0) {
+        resultsDiv.innerHTML = `
+          <div class="text-center text-gray-500">
+            <i class="fas fa-history text-6xl mb-4"></i>
+            <p class="text-lg">Aucune prédiction trouvée</p>
+            <p class="text-sm mt-2">Créez votre première prédiction en remplissant le formulaire</p>
+          </div>
+        `;
+        return;
+      }
+      
+      resultsDiv.innerHTML = `
+        <div class="space-y-4">
+          <h3 class="text-xl font-semibold text-gray-900 mb-4">
+            <i class="fas fa-history mr-2"></i>Historique des Prédictions (${predictions.length})
+          </h3>
+          <div class="space-y-3 max-h-96 overflow-y-auto">
+            ${predictions.map((pred, index) => {
+              const createdDate = new Date(pred.created_at).toLocaleDateString('fr-FR');
+              const createdTime = new Date(pred.created_at).toLocaleTimeString('fr-FR');
+              const prediction = pred.prediction_data;
+              
+              // Calculate BMI
+              const bmi = (prediction.Weight / (prediction.Height * prediction.Height)).toFixed(1);
+              
+              return `
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div class="flex justify-between items-start mb-2">
+                    <div>
+                      <h4 class="font-semibold text-gray-900">Prédiction #${index + 1}</h4>
+                      <p class="text-sm text-gray-600">${createdDate} à ${createdTime}</p>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-sm text-gray-600">IMC: ${bmi}</p>
+                      <p class="text-xs text-gray-500">ID: ${pred._id.substring(0, 8)}...</p>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div><span class="font-medium">Genre:</span> ${prediction.Gender}</div>
+                    <div><span class="font-medium">Âge:</span> ${prediction.Age} ans</div>
+                    <div><span class="font-medium">Taille:</span> ${prediction.Height}m</div>
+                    <div><span class="font-medium">Poids:</span> ${prediction.Weight}kg</div>
+                  </div>
+                  <div class="mt-2 flex justify-between items-center">
+                    <button onclick="viewPredictionDetails('${pred._id}')" class="text-blue-600 hover:text-blue-800 text-sm">
+                      <i class="fas fa-eye mr-1"></i>Voir détails
+                    </button>
+                    <button onclick="deletePrediction('${pred._id}')" class="text-red-600 hover:text-red-800 text-sm">
+                      <i class="fas fa-trash mr-1"></i>Supprimer
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="text-center pt-4">
+            <button onclick="document.getElementById('results').innerHTML='<div class=\\"text-center text-gray-500\\"><i class=\\"fas fa-arrow-left text-6xl mb-4\\"></i><p class=\\"text-lg\\">Remplissez le formulaire pour voir votre analyse personnalisée</p><p class=\\"text-sm mt-2\\">Notre IA analysera vos données et vous fournira des recommandations</p></div>'" class="text-blue-600 hover:text-blue-800 font-medium">
+              <i class="fas fa-arrow-left mr-1"></i>Retour au formulaire
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // View prediction details
+    async function viewPredictionDetails(predictId) {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      loadingOverlay.classList.remove('hidden');
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Display detailed prediction (you can expand this)
+          showNotification('Détails de la prédiction chargés', 'success');
+        } else {
+          showNotification('Erreur lors du chargement des détails: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion: ' + error.message, 'error');
+      } finally {
+        loadingOverlay.classList.add('hidden');
+      }
+    }
+
+    // Delete prediction
+    async function deletePrediction(predictId) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer cette prédiction ?')) {
+        return;
+      }
+      
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      loadingOverlay.classList.remove('hidden');
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showNotification('Prédiction supprimée avec succès', 'success');
+          // Reload predictions
+          loadUserPredictions();
+        } else {
+          showNotification('Erreur lors de la suppression: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion: ' + error.message, 'error');
+      } finally {
+        loadingOverlay.classList.add('hidden');
+      }
+    }
+
+    // Notification system
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+      }`;
+      notification.innerHTML = `
+        <div class="flex items-center">
+          <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

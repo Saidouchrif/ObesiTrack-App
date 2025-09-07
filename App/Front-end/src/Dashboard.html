@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - ObesiTrack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <i class="fas fa-heartbeat text-3xl text-blue-600 mr-3"></i>
+            <h1 class="text-2xl font-bold text-gray-900">ObesiTrack</h1>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="/statistics" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-chart-pie mr-1"></i>Statistiques
+          </a>
+          <a href="/history" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-history mr-1"></i>Historique
+          </a>
+          <span id="userInfo" class="text-gray-700 px-3 py-2 text-sm"></span>
+          <button onclick="logout()" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-sign-out-alt mr-1"></i>Déconnexion
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Welcome Section -->
+    <div class="gradient-bg rounded-2xl p-8 mb-8 text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold mb-2" id="welcomeMessage">Bienvenue sur votre Dashboard</h1>
+          <p class="text-xl text-gray-200">Analysez votre santé avec notre IA avancée</p>
+        </div>
+        <div class="text-right">
+          <div class="text-4xl font-bold" id="totalPredictions">0</div>
+          <div class="text-gray-200">Prédictions effectuées</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+      <div class="card-hover bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+        <div class="text-center">
+          <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-brain text-2xl text-blue-600"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Nouvelle Prédiction</h3>
+          <p class="text-gray-600 mb-4">Analysez votre profil de santé avec notre IA</p>
+          <button onclick="startNewPrediction()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+            <i class="fas fa-plus mr-2"></i>Commencer
+          </button>
+        </div>
+      </div>
+
+      <div class="card-hover bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+        <div class="text-center">
+          <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-history text-2xl text-green-600"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Historique</h3>
+          <p class="text-gray-600 mb-4">Consultez vos prédictions précédentes</p>
+          <a href="/history" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300 text-center block">
+            <i class="fas fa-chart-line mr-2"></i>Voir l'historique
+          </a>
+        </div>
+      </div>
+
+      <div class="card-hover bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+        <div class="text-center">
+          <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-chart-pie text-2xl text-purple-600"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Statistiques</h3>
+          <p class="text-gray-600 mb-4">Analysez vos tendances de santé</p>
+          <a href="/statistics" class="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-300 text-center block">
+            <i class="fas fa-analytics mr-2"></i>Voir les stats
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="grid lg:grid-cols-2 gap-8">
+      <!-- Prediction Form -->
+      <div id="predictionSection" class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+          <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
+          Informations de Santé
+        </h2>
+
+        <form id="predictionForm" class="space-y-6">
+          <!-- Personal Information -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-venus-mars mr-1"></i>Genre
+              </label>
+              <select id="Gender" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Sélectionner</option>
+                <option value="Male">Homme</option>
+                <option value="Female">Femme</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-birthday-cake mr-1"></i>Âge
+              </label>
+              <input type="number" id="Age" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="25" min="1" max="120" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-ruler-vertical mr-1"></i>Taille (m)
+              </label>
+              <input type="number" id="Height" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="1.75" min="0.5" max="3.0" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-weight mr-1"></i>Poids (kg)
+              </label>
+              <input type="number" id="Weight" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="80.0" min="10" max="300" required>
+            </div>
+          </div>
+
+          <!-- Family History -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-family mr-1"></i>Antécédents familiaux de surpoids
+            </label>
+            <select id="family_history_with_overweight" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+              <option value="">Sélectionner</option>
+              <option value="yes">Oui</option>
+              <option value="no">Non</option>
+            </select>
+          </div>
+
+          <!-- Eating Habits -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-hamburger mr-1"></i>Consommation fréquente d'aliments caloriques
+              </label>
+              <select id="FAVC" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Sélectionner</option>
+                <option value="yes">Oui</option>
+                <option value="no">Non</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-carrot mr-1"></i>Fréquence de consommation de légumes (1-3)
+              </label>
+              <input type="number" id="FCVC" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="2.0" min="1" max="3" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-utensils mr-1"></i>Nombre de repas principaux (1-4)
+              </label>
+              <input type="number" id="NCP" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="3.0" min="1" max="4" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-apple-alt mr-1"></i>Consommation d'aliments entre les repas
+              </label>
+              <select id="CAEC" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Sélectionner</option>
+                <option value="no">Non</option>
+                <option value="Sometimes">Parfois</option>
+                <option value="Frequently">Fréquemment</option>
+                <option value="Always">Toujours</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Lifestyle -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-smoking mr-1"></i>Fumeur
+              </label>
+              <select id="SMOKE" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Sélectionner</option>
+                <option value="yes">Oui</option>
+                <option value="no">Non</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-tint mr-1"></i>Consommation d'eau (1-3)
+              </label>
+              <input type="number" id="CH2O" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="2.0" min="1" max="3" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-chart-line mr-1"></i>Surveillance des calories
+              </label>
+              <select id="SCC" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Sélectionner</option>
+                <option value="yes">Oui</option>
+                <option value="no">Non</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-running mr-1"></i>Activité physique (0-3)
+              </label>
+              <input type="number" id="FAF" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="1.0" min="0" max="3" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-tv mr-1"></i>Temps devant les écrans (0-2)
+              </label>
+              <input type="number" id="TUE" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.0" min="0" max="2" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-wine-glass mr-1"></i>Consommation d'alcool
+              </label>
+              <select id="CALC" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Sélectionner</option>
+                <option value="no">Non</option>
+                <option value="Sometimes">Parfois</option>
+                <option value="Frequently">Fréquemment</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-bus mr-1"></i>Moyen de transport
+            </label>
+            <select id="MTRANS" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+              <option value="">Sélectionner</option>
+              <option value="Public_Transportation">Transport public</option>
+              <option value="Walking">Marche</option>
+              <option value="Bike">Vélo</option>
+              <option value="Motorbike">Moto</option>
+              <option value="Automobile">Voiture</option>
+            </select>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i class="fas fa-brain mr-2"></i>
+            Analyser avec l'IA
+          </button>
+        </form>
+      </div>
+
+      <!-- Results Section -->
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+          <i class="fas fa-chart-pie text-green-600 mr-2"></i>
+          Résultats de l'Analyse
+        </h2>
+
+        <div id="results" class="text-center text-gray-500">
+          <i class="fas fa-arrow-left text-6xl mb-4"></i>
+          <p class="text-lg">Remplissez le formulaire pour voir votre analyse personnalisée</p>
+          <p class="text-sm mt-2">Notre IA analysera vos données et vous fournira des recommandations</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Section (Hidden by default) -->
+    <div id="historySection" class="hidden mt-8">
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-semibold text-gray-900">
+            <i class="fas fa-history text-blue-600 mr-2"></i>
+            Historique des Prédictions
+          </h2>
+          <button onclick="hideHistory()" class="text-gray-600 hover:text-gray-800">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+        <div id="historyContent"></div>
+      </div>
+    </div>
+
+    <!-- Statistics Section (Hidden by default) -->
+    <div id="statisticsSection" class="hidden mt-8">
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-semibold text-gray-900">
+            <i class="fas fa-chart-pie text-purple-600 mr-2"></i>
+            Statistiques de Santé
+          </h2>
+          <button onclick="hideStatistics()" class="text-gray-600 hover:text-gray-800">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+        
+        <!-- Statistics Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div class="bg-blue-50 rounded-lg p-4 text-center">
+            <div class="text-2xl font-bold text-blue-600" id="totalPredictionsStat">0</div>
+            <div class="text-sm text-blue-800">Total Prédictions</div>
+          </div>
+          <div class="bg-green-50 rounded-lg p-4 text-center">
+            <div class="text-2xl font-bold text-green-600" id="normalWeightCount">0</div>
+            <div class="text-sm text-green-800">Poids Normal</div>
+          </div>
+          <div class="bg-yellow-50 rounded-lg p-4 text-center">
+            <div class="text-2xl font-bold text-yellow-600" id="overweightCount">0</div>
+            <div class="text-sm text-yellow-800">Surpoids</div>
+          </div>
+          <div class="bg-red-50 rounded-lg p-4 text-center">
+            <div class="text-2xl font-bold text-red-600" id="obesityCount">0</div>
+            <div class="text-sm text-red-800">Obésité</div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Distribution Chart -->
+          <div class="bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+              <i class="fas fa-chart-pie mr-2"></i>Distribution des Catégories
+            </h3>
+            <div class="relative h-64">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+
+          <!-- BMI Trend Chart -->
+          <div class="bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+              <i class="fas fa-chart-line mr-2"></i>Évolution de l'IMC
+            </h3>
+            <div class="relative h-64">
+              <canvas id="bmiTrendChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monthly Activity Chart -->
+        <div class="mt-8 bg-gray-50 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-calendar-alt mr-2"></i>Activité Mensuelle
+          </h3>
+          <div class="relative h-64">
+            <canvas id="monthlyActivityChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Detailed Statistics -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+              <i class="fas fa-info-circle mr-2"></i>Informations Détaillées
+            </h3>
+            <div id="detailedStats" class="space-y-3">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+          
+          <div class="bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+              <i class="fas fa-trophy mr-2"></i>Recommandations
+            </h3>
+            <div id="statisticsRecommendations" class="space-y-3">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-8 text-center">
+      <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i>
+      <p class="text-lg font-semibold">Analyse en cours...</p>
+      <p class="text-gray-600">Notre IA traite vos données</p>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+
+    // Check authentication and load user data
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user'));
+      
+      if (!token || !user) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      currentUser = user;
+      updateUserInterface();
+      loadUserStats();
+    });
+
+    // Update user interface
+    function updateUserInterface() {
+      document.getElementById('userInfo').textContent = `Bonjour ${currentUser.name}`;
+      document.getElementById('welcomeMessage').textContent = `Bienvenue ${currentUser.name}`;
+    }
+
+    // Load user statistics
+    async function loadUserStats() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:7777/predictions', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          document.getElementById('totalPredictions').textContent = data.count;
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
+
+    // Start new prediction
+    function startNewPrediction() {
+      document.getElementById('predictionSection').scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('predictionForm').reset();
+      document.getElementById('results').innerHTML = `
+        <div class="text-center text-gray-500">
+          <i class="fas fa-arrow-left text-6xl mb-4"></i>
+          <p class="text-lg">Remplissez le formulaire pour voir votre analyse personnalisée</p>
+          <p class="text-sm mt-2">Notre IA analysera vos données et vous fournira des recommandations</p>
+        </div>
+      `;
+    }
+
+    // View history
+    async function viewHistory() {
+      const historySection = document.getElementById('historySection');
+      const historyContent = document.getElementById('historyContent');
+      
+      historySection.classList.remove('hidden');
+      historyContent.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Chargement de l\'historique...</p></div>';
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:7777/predictions', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          displayHistory(data.predictions);
+        } else {
+          historyContent.innerHTML = '<div class="text-center text-red-600"><p>Erreur lors du chargement de l\'historique</p></div>';
+        }
+      } catch (error) {
+        historyContent.innerHTML = '<div class="text-center text-red-600"><p>Erreur de connexion</p></div>';
+      }
+    }
+
+    // Hide history
+    function hideHistory() {
+      document.getElementById('historySection').classList.add('hidden');
+    }
+
+    // Display history
+    function displayHistory(predictions) {
+      const historyContent = document.getElementById('historyContent');
+      
+      if (predictions.length === 0) {
+        historyContent.innerHTML = `
+          <div class="text-center text-gray-500 py-12">
+            <i class="fas fa-history text-6xl mb-4"></i>
+            <p class="text-lg">Aucune prédiction trouvée</p>
+            <p class="text-sm mt-2">Créez votre première prédiction en remplissant le formulaire</p>
+          </div>
+        `;
+        return;
+      }
+      
+      historyContent.innerHTML = `
+        <div class="space-y-4">
+          <!-- Summary -->
+          <div class="bg-blue-50 rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-semibold text-blue-900">Résumé de l'historique</h3>
+                <p class="text-sm text-blue-700">${predictions.length} prédiction${predictions.length > 1 ? 's' : ''} au total</p>
+              </div>
+              <div class="text-right">
+                <button onclick="exportHistory()" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                  <i class="fas fa-download mr-1"></i>Exporter
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Predictions List -->
+          <div class="space-y-3 max-h-96 overflow-y-auto">
+            ${predictions.map((pred, index) => {
+              const createdDate = new Date(pred.created_at).toLocaleDateString('fr-FR');
+              const createdTime = new Date(pred.created_at).toLocaleTimeString('fr-FR');
+              const prediction = pred.prediction_data;
+              
+              // Calculate BMI
+              const bmi = (prediction.Weight / (prediction.Height * prediction.Height)).toFixed(1);
+              
+              // Get prediction result
+              const predictionResult = prediction.prediction || 'Unknown';
+              const categories = {
+                'Insufficient_Weight': { color: 'text-blue-600', bg: 'bg-blue-100', desc: 'Poids Insuffisant' },
+                'Normal_Weight': { color: 'text-green-600', bg: 'bg-green-100', desc: 'Poids Normal' },
+                'Overweight_Level_I': { color: 'text-yellow-600', bg: 'bg-yellow-100', desc: 'Surpoids Niveau I' },
+                'Overweight_Level_II': { color: 'text-orange-600', bg: 'bg-orange-100', desc: 'Surpoids Niveau II' },
+                'Obesity_Type_I': { color: 'text-red-600', bg: 'bg-red-100', desc: 'Obésité Type I' },
+                'Obesity_Type_II': { color: 'text-red-700', bg: 'bg-red-200', desc: 'Obésité Type II' },
+                'Obesity_Type_III': { color: 'text-red-800', bg: 'bg-red-300', desc: 'Obésité Type III' }
+              };
+              
+              const category = categories[predictionResult] || { color: 'text-gray-600', bg: 'bg-gray-100', desc: predictionResult };
+              
+              return `
+                <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                  <div class="flex justify-between items-start mb-3">
+                    <div>
+                      <h4 class="font-semibold text-gray-900">Prédiction #${index + 1}</h4>
+                      <p class="text-sm text-gray-600">${createdDate} à ${createdTime}</p>
+                    </div>
+                    <div class="text-right">
+                      <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${category.bg} ${category.color}">
+                        ${category.desc}
+                      </div>
+                      <p class="text-sm text-gray-600 mt-1">IMC: ${bmi}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="grid grid-cols-2 gap-3 text-sm mb-3">
+                    <div class="flex justify-between">
+                      <span class="font-medium text-gray-600">Genre:</span>
+                      <span class="text-gray-900">${prediction.Gender === 'Male' ? 'Homme' : 'Femme'}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="font-medium text-gray-600">Âge:</span>
+                      <span class="text-gray-900">${prediction.Age} ans</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="font-medium text-gray-600">Taille:</span>
+                      <span class="text-gray-900">${prediction.Height}m</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="font-medium text-gray-600">Poids:</span>
+                      <span class="text-gray-900">${prediction.Weight}kg</span>
+                    </div>
+                  </div>
+                  
+                  <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                    <div class="flex space-x-2">
+                      <button onclick="viewPredictionDetails('${pred._id}')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        <i class="fas fa-eye mr-1"></i>Détails
+                      </button>
+                      <button onclick="duplicatePrediction('${pred._id}')" class="text-green-600 hover:text-green-800 text-sm font-medium">
+                        <i class="fas fa-copy mr-1"></i>Dupliquer
+                      </button>
+                    </div>
+                    <button onclick="deletePrediction('${pred._id}')" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                      <i class="fas fa-trash mr-1"></i>Supprimer
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // View statistics
+    async function viewStatistics() {
+      const statisticsSection = document.getElementById('statisticsSection');
+      statisticsSection.classList.remove('hidden');
+      
+      // Load and display statistics
+      await loadStatistics();
+    }
+
+    // Hide statistics
+    function hideStatistics() {
+      document.getElementById('statisticsSection').classList.add('hidden');
+    }
+
+    // Load statistics data
+    async function loadStatistics() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:7777/predictions', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          displayStatistics(data.predictions);
+        } else {
+          showNotification('Erreur lors du chargement des statistiques', 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion lors du chargement des statistiques', 'error');
+      }
+    }
+
+    // Display statistics with charts
+    function displayStatistics(predictions) {
+      if (predictions.length === 0) {
+        document.getElementById('statisticsSection').innerHTML = `
+          <div class="text-center text-gray-500 py-12">
+            <i class="fas fa-chart-pie text-6xl mb-4"></i>
+            <p class="text-lg">Aucune donnée statistique disponible</p>
+            <p class="text-sm mt-2">Effectuez quelques prédictions pour voir vos statistiques</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Calculate statistics
+      const stats = calculateStatistics(predictions);
+      
+      // Update overview cards
+      document.getElementById('totalPredictionsStat').textContent = stats.total;
+      document.getElementById('normalWeightCount').textContent = stats.normalWeight;
+      document.getElementById('overweightCount').textContent = stats.overweight;
+      document.getElementById('obesityCount').textContent = stats.obesity;
+
+      // Create charts
+      createCategoryChart(stats.categoryDistribution);
+      createBMITrendChart(stats.bmiTrend);
+      createMonthlyActivityChart(stats.monthlyActivity);
+      
+      // Display detailed statistics
+      displayDetailedStats(stats);
+      displayStatisticsRecommendations(stats);
+    }
+
+    // Calculate statistics from predictions
+    function calculateStatistics(predictions) {
+      const stats = {
+        total: predictions.length,
+        normalWeight: 0,
+        overweight: 0,
+        obesity: 0,
+        categoryDistribution: {},
+        bmiTrend: [],
+        monthlyActivity: {},
+        averageBMI: 0,
+        bmiRange: { min: Infinity, max: -Infinity }
+      };
+
+      let totalBMI = 0;
+
+      predictions.forEach((pred, index) => {
+        const prediction = pred.prediction_data;
+        const bmi = prediction.Weight / (prediction.Height * prediction.Height);
+        
+        // BMI calculations
+        totalBMI += bmi;
+        stats.bmiRange.min = Math.min(stats.bmiRange.min, bmi);
+        stats.bmiRange.max = Math.max(stats.bmiRange.max, bmi);
+        
+        // Category distribution
+        const category = prediction.prediction || 'Unknown';
+        stats.categoryDistribution[category] = (stats.categoryDistribution[category] || 0) + 1;
+        
+        // BMI trend (last 10 predictions)
+        if (index < 10) {
+          stats.bmiTrend.unshift({
+            date: new Date(pred.created_at).toLocaleDateString('fr-FR'),
+            bmi: bmi.toFixed(1)
+          });
+        }
+        
+        // Monthly activity
+        const month = new Date(pred.created_at).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+        stats.monthlyActivity[month] = (stats.monthlyActivity[month] || 0) + 1;
+        
+        // Category counts
+        if (category === 'Normal_Weight') {
+          stats.normalWeight++;
+        } else if (category.includes('Overweight')) {
+          stats.overweight++;
+        } else if (category.includes('Obesity')) {
+          stats.obesity++;
+        }
+      });
+
+      stats.averageBMI = (totalBMI / predictions.length).toFixed(1);
+      stats.bmiRange.min = stats.bmiRange.min.toFixed(1);
+      stats.bmiRange.max = stats.bmiRange.max.toFixed(1);
+
+      return stats;
+    }
+
+    // Create category distribution chart
+    function createCategoryChart(categoryDistribution) {
+      const ctx = document.getElementById('categoryChart').getContext('2d');
+      
+      const categories = {
+        'Insufficient_Weight': 'Poids Insuffisant',
+        'Normal_Weight': 'Poids Normal',
+        'Overweight_Level_I': 'Surpoids Niveau I',
+        'Overweight_Level_II': 'Surpoids Niveau II',
+        'Obesity_Type_I': 'Obésité Type I',
+        'Obesity_Type_II': 'Obésité Type II',
+        'Obesity_Type_III': 'Obésité Type III'
+      };
+
+      const labels = Object.keys(categoryDistribution).map(key => categories[key] || key);
+      const data = Object.values(categoryDistribution);
+      const colors = [
+        '#3B82F6', '#10B981', '#F59E0B', '#F97316', 
+        '#EF4444', '#DC2626', '#991B1B'
+      ];
+
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: colors.slice(0, labels.length),
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                usePointStyle: true
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Create BMI trend chart
+    function createBMITrendChart(bmiTrend) {
+      const ctx = document.getElementById('bmiTrendChart').getContext('2d');
+      
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: bmiTrend.map(item => item.date),
+          datasets: [{
+            label: 'IMC',
+            data: bmiTrend.map(item => item.bmi),
+            borderColor: '#3B82F6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#3B82F6',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: false,
+              title: {
+                display: true,
+                text: 'IMC'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Date'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    }
+
+    // Create monthly activity chart
+    function createMonthlyActivityChart(monthlyActivity) {
+      const ctx = document.getElementById('monthlyActivityChart').getContext('2d');
+      
+      const months = Object.keys(monthlyActivity).sort();
+      const counts = months.map(month => monthlyActivity[month]);
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: months,
+          datasets: [{
+            label: 'Prédictions',
+            data: counts,
+            backgroundColor: 'rgba(139, 92, 246, 0.8)',
+            borderColor: '#8B5CF6',
+            borderWidth: 1,
+            borderRadius: 8,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              },
+              title: {
+                display: true,
+                text: 'Nombre de prédictions'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Mois'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    }
+
+    // Display detailed statistics
+    function displayDetailedStats(stats) {
+      const detailedStatsDiv = document.getElementById('detailedStats');
+      
+      detailedStatsDiv.innerHTML = `
+        <div class="space-y-3">
+          <div class="flex justify-between items-center py-2 border-b border-gray-200">
+            <span class="text-sm font-medium text-gray-600">IMC Moyen</span>
+            <span class="text-sm font-semibold text-gray-900">${stats.averageBMI}</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-gray-200">
+            <span class="text-sm font-medium text-gray-600">IMC Minimum</span>
+            <span class="text-sm font-semibold text-gray-900">${stats.bmiRange.min}</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-gray-200">
+            <span class="text-sm font-medium text-gray-600">IMC Maximum</span>
+            <span class="text-sm font-semibold text-gray-900">${stats.bmiRange.max}</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-gray-200">
+            <span class="text-sm font-medium text-gray-600">Poids Normal</span>
+            <span class="text-sm font-semibold text-green-600">${stats.normalWeight} (${((stats.normalWeight/stats.total)*100).toFixed(1)}%)</span>
+          </div>
+          <div class="flex justify-between items-center py-2 border-b border-gray-200">
+            <span class="text-sm font-medium text-gray-600">Surpoids</span>
+            <span class="text-sm font-semibold text-yellow-600">${stats.overweight} (${((stats.overweight/stats.total)*100).toFixed(1)}%)</span>
+          </div>
+          <div class="flex justify-between items-center py-2">
+            <span class="text-sm font-medium text-gray-600">Obésité</span>
+            <span class="text-sm font-semibold text-red-600">${stats.obesity} (${((stats.obesity/stats.total)*100).toFixed(1)}%)</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // Display statistics recommendations
+    function displayStatisticsRecommendations(stats) {
+      const recommendationsDiv = document.getElementById('statisticsRecommendations');
+      const recommendations = [];
+      
+      // BMI-based recommendations
+      const avgBMI = parseFloat(stats.averageBMI);
+      if (avgBMI < 18.5) {
+        recommendations.push('• Votre IMC moyen indique un poids insuffisant. Consultez un nutritionniste.');
+      } else if (avgBMI >= 18.5 && avgBMI < 25) {
+        recommendations.push('• Excellent ! Votre IMC moyen est dans la normale.');
+      } else if (avgBMI >= 25 && avgBMI < 30) {
+        recommendations.push('• Votre IMC moyen indique un surpoids. Adoptez une alimentation équilibrée.');
+      } else {
+        recommendations.push('• Votre IMC moyen indique une obésité. Consultez un médecin rapidement.');
+      }
+      
+      // Activity-based recommendations
+      const totalMonths = Object.keys(stats.monthlyActivity).length;
+      if (totalMonths > 0) {
+        const avgPerMonth = stats.total / totalMonths;
+        if (avgPerMonth < 1) {
+          recommendations.push('• Augmentez la fréquence de vos analyses pour un meilleur suivi.');
+        } else if (avgPerMonth > 4) {
+          recommendations.push('• Vous suivez bien votre santé ! Continuez ainsi.');
+        }
+      }
+      
+      // Category-based recommendations
+      if (stats.obesity > stats.normalWeight) {
+        recommendations.push('• Privilégiez une consultation médicale pour un suivi personnalisé.');
+      }
+      
+      if (recommendations.length === 0) {
+        recommendations.push('• Continuez à surveiller votre santé régulièrement.');
+      }
+      
+      recommendationsDiv.innerHTML = `
+        <div class="space-y-3">
+          ${recommendations.map(rec => `
+            <div class="flex items-start">
+              <i class="fas fa-check-circle text-green-500 mt-1 mr-2 flex-shrink-0"></i>
+              <span class="text-sm text-gray-700">${rec}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // Form submission
+    document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const resultsDiv = document.getElementById('results');
+      
+      // Show loading
+      loadingOverlay.classList.remove('hidden');
+      
+      // Collect form data
+      const formData = {
+        Gender: document.getElementById('Gender').value,
+        Age: parseFloat(document.getElementById('Age').value),
+        Height: parseFloat(document.getElementById('Height').value),
+        Weight: parseFloat(document.getElementById('Weight').value),
+        family_history_with_overweight: document.getElementById('family_history_with_overweight').value,
+        FAVC: document.getElementById('FAVC').value,
+        FCVC: parseFloat(document.getElementById('FCVC').value),
+        NCP: parseFloat(document.getElementById('NCP').value),
+        CAEC: document.getElementById('CAEC').value,
+        SMOKE: document.getElementById('SMOKE').value,
+        CH2O: parseFloat(document.getElementById('CH2O').value),
+        SCC: document.getElementById('SCC').value,
+        FAF: parseFloat(document.getElementById('FAF').value),
+        TUE: parseFloat(document.getElementById('TUE').value),
+        CALC: document.getElementById('CALC').value,
+        MTRANS: document.getElementById('MTRANS').value
+      };
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:7777/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Save form data for retry functionality
+          saveFormData(formData);
+          // Display results
+          displayResults(data, formData);
+          // Update stats
+          loadUserStats();
+          showNotification('Prédiction sauvegardée avec succès !', 'success');
+        } else {
+          showNotification('Erreur lors de l\'analyse: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion: ' + error.message, 'error');
+      } finally {
+        loadingOverlay.classList.add('hidden');
+      }
+    });
+
+    // Display results
+    function displayResults(data, formData) {
+      const resultsDiv = document.getElementById('results');
+      
+      // Calculate BMI
+      const bmi = (formData.Weight / (formData.Height * formData.Height)).toFixed(1);
+      
+      // Get prediction details
+      const prediction = data.prediction;
+      const probabilities = data.probabilities || {};
+      const mlStatus = data.ml_status || 'unknown';
+      const mlError = data.ml_error || '';
+      
+      // Define obesity categories with colors and descriptions
+      const categories = {
+        'Insufficient_Weight': { color: 'text-blue-600', bg: 'bg-blue-100', desc: 'Poids Insuffisant' },
+        'Normal_Weight': { color: 'text-green-600', bg: 'bg-green-100', desc: 'Poids Normal' },
+        'Overweight_Level_I': { color: 'text-yellow-600', bg: 'bg-yellow-100', desc: 'Surpoids Niveau I' },
+        'Overweight_Level_II': { color: 'text-orange-600', bg: 'bg-orange-100', desc: 'Surpoids Niveau II' },
+        'Obesity_Type_I': { color: 'text-red-600', bg: 'bg-red-100', desc: 'Obésité Type I' },
+        'Obesity_Type_II': { color: 'text-red-700', bg: 'bg-red-200', desc: 'Obésité Type II' },
+        'Obesity_Type_III': { color: 'text-red-800', bg: 'bg-red-300', desc: 'Obésité Type III' }
+      };
+      
+      const category = categories[prediction] || { color: 'text-gray-600', bg: 'bg-gray-100', desc: prediction };
+      
+      // Status indicator
+      let statusIndicator = '';
+      if (mlStatus === 'success') {
+        statusIndicator = `
+          <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            <div class="flex items-center">
+              <i class="fas fa-check-circle mr-2"></i>
+              <span class="font-semibold">Analyse IA réussie</span>
+            </div>
+            <p class="text-sm mt-1">Résultats obtenus via le modèle d'intelligence artificielle</p>
+          </div>
+        `;
+      } else if (mlStatus === 'fallback') {
+        statusIndicator = `
+          <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+            <div class="flex items-center">
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              <span class="font-semibold">Mode de secours activé</span>
+            </div>
+            <p class="text-sm mt-1">L'API ML est temporairement indisponible. Résultats simulés affichés.</p>
+            ${mlError ? `<p class="text-xs mt-2 opacity-75">Erreur: ${mlError}</p>` : ''}
+          </div>
+        `;
+      }
+      
+      resultsDiv.innerHTML = `
+        <div class="space-y-6">
+          ${statusIndicator}
+          
+          <!-- Main Prediction -->
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 ${category.bg} rounded-full mb-4">
+              <i class="fas fa-chart-line text-3xl ${category.color}"></i>
+            </div>
+            <h3 class="text-3xl font-bold ${category.color} mb-2">${category.desc}</h3>
+            <p class="text-gray-600">IMC calculé: ${bmi}</p>
+            <p class="text-sm text-gray-500 mt-1">ID de prédiction: ${data.predict_id}</p>
+          </div>
+          
+          <!-- Probabilities -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="font-semibold text-gray-900 mb-3">Probabilités par catégorie:</h4>
+            <div class="space-y-2">
+              ${Object.entries(probabilities).map(([cat, prob]) => {
+                const catInfo = categories[cat] || { color: 'text-gray-600', desc: cat };
+                const percentage = (prob * 100).toFixed(1);
+                return `
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm ${catInfo.color}">${catInfo.desc}</span>
+                    <div class="flex items-center">
+                      <div class="w-24 bg-gray-200 rounded-full h-2 mr-2">
+                        <div class="h-2 rounded-full ${catInfo.bg}" style="width: ${percentage}%"></div>
+                      </div>
+                      <span class="text-sm font-medium">${percentage}%</span>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+          
+          <!-- Recommendations -->
+          <div class="bg-blue-50 rounded-lg p-4">
+            <h4 class="font-semibold text-blue-900 mb-3">
+              <i class="fas fa-lightbulb mr-2"></i>Recommandations
+            </h4>
+            <div class="text-sm text-blue-800 space-y-2">
+              ${getRecommendations(prediction, formData)}
+            </div>
+          </div>
+          
+          <!-- API Status Info -->
+          ${mlStatus === 'fallback' ? `
+            <div class="bg-gray-100 rounded-lg p-4">
+              <h4 class="font-semibold text-gray-900 mb-2">
+                <i class="fas fa-info-circle mr-2"></i>Information sur l'API
+              </h4>
+              <p class="text-sm text-gray-700">
+                L'API du modèle d'intelligence artificielle n'est pas accessible. 
+                Veuillez vous assurer que le service ML est démarré sur le port 8000.
+              </p>
+              <div class="mt-2">
+                <button onclick="retryPrediction()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                  <i class="fas fa-redo mr-1"></i>Réessayer avec l'API ML
+                </button>
+              </div>
+            </div>
+          ` : ''}
+          
+          <!-- New Analysis Button -->
+          <div class="text-center">
+            <button onclick="startNewPrediction()" class="text-blue-600 hover:text-blue-800 font-medium">
+              <i class="fas fa-redo mr-1"></i>Nouvelle Analyse
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Get recommendations based on prediction
+    function getRecommendations(prediction, formData) {
+      const recommendations = [];
+      
+      if (prediction === 'Insufficient_Weight') {
+        recommendations.push('• Consultez un nutritionniste pour un plan alimentaire adapté');
+        recommendations.push('• Augmentez progressivement votre apport calorique');
+        recommendations.push('• Pratiquez des exercices de musculation');
+      } else if (prediction === 'Normal_Weight') {
+        recommendations.push('• Maintenez vos bonnes habitudes alimentaires');
+        recommendations.push('• Continuez une activité physique régulière');
+        recommendations.push('• Surveillez votre poids régulièrement');
+      } else if (prediction.includes('Overweight')) {
+        recommendations.push('• Réduisez votre apport calorique quotidien');
+        recommendations.push('• Augmentez votre activité physique');
+        recommendations.push('• Consultez un professionnel de santé');
+      } else if (prediction.includes('Obesity')) {
+        recommendations.push('• Consultez immédiatement un médecin');
+        recommendations.push('• Suivez un programme de perte de poids supervisé');
+        recommendations.push('• Modifiez radicalement votre mode de vie');
+      }
+      
+      // Add specific recommendations based on form data
+      if (formData.FAVC === 'yes') {
+        recommendations.push('• Réduisez la consommation d\'aliments caloriques');
+      }
+      if (formData.FAF < 1.5) {
+        recommendations.push('• Augmentez votre activité physique');
+      }
+      if (formData.CH2O < 2) {
+        recommendations.push('• Buvez plus d\'eau quotidiennement');
+      }
+      
+      return recommendations.join('<br>');
+    }
+
+    // View prediction details
+    async function viewPredictionDetails(predictId) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Show detailed modal or redirect to detailed view
+          showPredictionModal(data.prediction);
+        } else {
+          showNotification('Erreur lors du chargement des détails', 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion', 'error');
+      }
+    }
+
+    // Show prediction modal
+    function showPredictionModal(prediction) {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4';
+      modal.innerHTML = `
+        <div class="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-900">Détails de la Prédiction</h3>
+            <button onclick="this.closest('.fixed').remove()" class="text-gray-600 hover:text-gray-800">
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+          
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div><strong>Date:</strong> ${new Date(prediction.created_at).toLocaleString('fr-FR')}</div>
+              <div><strong>ID:</strong> ${prediction._id}</div>
+            </div>
+            
+            <div class="bg-gray-50 rounded-lg p-4">
+              <h4 class="font-semibold mb-2">Données de Santé</h4>
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <div>Genre: ${prediction.prediction_data.Gender}</div>
+                <div>Âge: ${prediction.prediction_data.Age} ans</div>
+                <div>Taille: ${prediction.prediction_data.Height}m</div>
+                <div>Poids: ${prediction.prediction_data.Weight}kg</div>
+                <div>Antécédents familiaux: ${prediction.prediction_data.family_history_with_overweight}</div>
+                <div>Aliments caloriques: ${prediction.prediction_data.FAVC}</div>
+                <div>Légumes: ${prediction.prediction_data.FCVC}</div>
+                <div>Repas principaux: ${prediction.prediction_data.NCP}</div>
+                <div>Collations: ${prediction.prediction_data.CAEC}</div>
+                <div>Fumeur: ${prediction.prediction_data.SMOKE}</div>
+                <div>Eau: ${prediction.prediction_data.CH2O}</div>
+                <div>Surveillance calories: ${prediction.prediction_data.SCC}</div>
+                <div>Activité physique: ${prediction.prediction_data.FAF}</div>
+                <div>Temps écrans: ${prediction.prediction_data.TUE}</div>
+                <div>Alcool: ${prediction.prediction_data.CALC}</div>
+                <div>Transport: ${prediction.prediction_data.MTRANS}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+    }
+
+    // Duplicate prediction
+    async function duplicatePrediction(predictId) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Fill form with prediction data
+          const pred = data.prediction.prediction_data;
+          document.getElementById('Gender').value = pred.Gender;
+          document.getElementById('Age').value = pred.Age;
+          document.getElementById('Height').value = pred.Height;
+          document.getElementById('Weight').value = pred.Weight;
+          document.getElementById('family_history_with_overweight').value = pred.family_history_with_overweight;
+          document.getElementById('FAVC').value = pred.FAVC;
+          document.getElementById('FCVC').value = pred.FCVC;
+          document.getElementById('NCP').value = pred.NCP;
+          document.getElementById('CAEC').value = pred.CAEC;
+          document.getElementById('SMOKE').value = pred.SMOKE;
+          document.getElementById('CH2O').value = pred.CH2O;
+          document.getElementById('SCC').value = pred.SCC;
+          document.getElementById('FAF').value = pred.FAF;
+          document.getElementById('TUE').value = pred.TUE;
+          document.getElementById('CALC').value = pred.CALC;
+          document.getElementById('MTRANS').value = pred.MTRANS;
+          
+          // Scroll to form
+          document.getElementById('predictionSection').scrollIntoView({ behavior: 'smooth' });
+          showNotification('Formulaire rempli avec les données de la prédiction', 'success');
+        } else {
+          showNotification('Erreur lors de la duplication', 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion', 'error');
+      }
+    }
+
+    // Export history
+    function exportHistory() {
+      try {
+        const token = localStorage.getItem('token');
+        fetch('http://localhost:7777/predictions', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.predictions) {
+            // Create CSV content
+            const csvContent = createCSV(data.predictions);
+            
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `obesitrack_historique_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Historique exporté avec succès', 'success');
+          }
+        })
+        .catch(error => {
+          showNotification('Erreur lors de l\'export', 'error');
+        });
+      } catch (error) {
+        showNotification('Erreur lors de l\'export', 'error');
+      }
+    }
+
+    // Create CSV content
+    function createCSV(predictions) {
+      const headers = [
+        'Date', 'Genre', 'Âge', 'Taille', 'Poids', 'IMC', 'Antécédents familiaux',
+        'Aliments caloriques', 'Légumes', 'Repas principaux', 'Collations', 'Fumeur',
+        'Eau', 'Surveillance calories', 'Activité physique', 'Temps écrans', 'Alcool', 'Transport'
+      ];
+      
+      const rows = predictions.map(pred => {
+        const data = pred.prediction_data;
+        const bmi = (data.Weight / (data.Height * data.Height)).toFixed(1);
+        const date = new Date(pred.created_at).toLocaleString('fr-FR');
+        
+        return [
+          date, data.Gender, data.Age, data.Height, data.Weight, bmi,
+          data.family_history_with_overweight, data.FAVC, data.FCVC, data.NCP,
+          data.CAEC, data.SMOKE, data.CH2O, data.SCC, data.FAF, data.TUE,
+          data.CALC, data.MTRANS
+        ];
+      });
+      
+      return [headers, ...rows].map(row => 
+        row.map(field => `"${field}"`).join(',')
+      ).join('\n');
+    }
+
+    // Delete prediction
+    async function deletePrediction(predictId) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer cette prédiction ?')) {
+        return;
+      }
+      
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      loadingOverlay.classList.remove('hidden');
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showNotification('Prédiction supprimée avec succès', 'success');
+          // Reload history and stats
+          viewHistory();
+          loadUserStats();
+        } else {
+          showNotification('Erreur lors de la suppression: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion: ' + error.message, 'error');
+      } finally {
+        loadingOverlay.classList.add('hidden');
+      }
+    }
+
+    // Retry prediction with ML API
+    async function retryPrediction() {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const resultsDiv = document.getElementById('results');
+      
+      // Show loading
+      loadingOverlay.classList.remove('hidden');
+      
+      // Get the last form data from localStorage or form
+      const formData = getLastFormData();
+      if (!formData) {
+        showNotification('Aucune donnée de formulaire trouvée. Veuillez remplir le formulaire à nouveau.', 'error');
+        loadingOverlay.classList.add('hidden');
+        return;
+      }
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:7777/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Display results
+          displayResults(data, formData);
+          // Update stats
+          loadUserStats();
+          showNotification('Prédiction mise à jour avec succès !', 'success');
+        } else {
+          showNotification('Erreur lors de la mise à jour: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion: ' + error.message, 'error');
+      } finally {
+        loadingOverlay.classList.add('hidden');
+      }
+    }
+
+    // Get last form data from localStorage
+    function getLastFormData() {
+      try {
+        const lastFormData = localStorage.getItem('lastPredictionData');
+        return lastFormData ? JSON.parse(lastFormData) : null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    // Save form data to localStorage
+    function saveFormData(formData) {
+      try {
+        localStorage.setItem('lastPredictionData', JSON.stringify(formData));
+      } catch (error) {
+        console.error('Error saving form data:', error);
+      }
+    }
+
+    // Notification system
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+      const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+      
+      notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${bgColor} text-white`;
+      notification.innerHTML = `
+        <div class="flex items-center">
+          <i class="fas ${icon} mr-2"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

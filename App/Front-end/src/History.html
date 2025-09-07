@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Historique - ObesiTrack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <i class="fas fa-heartbeat text-3xl text-blue-600 mr-3"></i>
+            <h1 class="text-2xl font-bold text-gray-900">ObesiTrack</h1>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="/dashboard" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-tachometer-alt mr-1"></i>Dashboard
+          </a>
+          <a href="/statistics" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-chart-pie mr-1"></i>Statistiques
+          </a>
+          <span id="userInfo" class="text-gray-700 px-3 py-2 text-sm"></span>
+          <button onclick="logout()" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-sign-out-alt mr-1"></i>Déconnexion
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="gradient-bg rounded-2xl p-8 mb-8 text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold mb-2">
+            <i class="fas fa-history mr-3"></i>
+            Historique des Prédictions
+          </h1>
+          <p class="text-xl text-gray-200">Consultez vos prédictions précédentes</p>
+        </div>
+        <div class="text-right">
+          <div class="text-4xl font-bold" id="totalPredictions">0</div>
+          <div class="text-gray-200">Prédictions totales</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters and Actions -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Filtrer par catégorie</label>
+            <select id="categoryFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Toutes les catégories</option>
+              <option value="Insufficient_Weight">Poids Insuffisant</option>
+              <option value="Normal_Weight">Poids Normal</option>
+              <option value="Overweight_Level_I">Surpoids Niveau I</option>
+              <option value="Overweight_Level_II">Surpoids Niveau II</option>
+              <option value="Obesity_Type_I">Obésité Type I</option>
+              <option value="Obesity_Type_II">Obésité Type II</option>
+              <option value="Obesity_Type_III">Obésité Type III</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Période</label>
+            <select id="periodFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Toutes les périodes</option>
+              <option value="7">7 derniers jours</option>
+              <option value="30">30 derniers jours</option>
+              <option value="90">3 derniers mois</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="exportHistory()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition duration-300">
+            <i class="fas fa-download mr-2"></i>Exporter
+          </button>
+          <button onclick="refreshHistory()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+            <i class="fas fa-sync-alt mr-2"></i>Actualiser
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="text-center py-12">
+      <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i>
+      <p class="text-lg font-semibold">Chargement de l'historique...</p>
+      <p class="text-gray-600">Récupération de vos prédictions</p>
+    </div>
+
+    <!-- History Content -->
+    <div id="historyContent" class="hidden">
+      <!-- Summary -->
+      <div class="bg-blue-50 rounded-lg p-6 mb-8">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xl font-semibold text-blue-900">Résumé de l'historique</h3>
+            <p class="text-sm text-blue-700" id="historySummary">0 prédiction au total</p>
+          </div>
+          <div class="text-right">
+            <div class="text-2xl font-bold text-blue-600" id="filteredCount">0</div>
+            <div class="text-sm text-blue-800">Résultats filtrés</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Predictions List -->
+      <div id="predictionsList" class="space-y-4">
+        <!-- Will be populated by JavaScript -->
+      </div>
+
+      <!-- Pagination -->
+      <div id="pagination" class="mt-8 flex justify-center">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-16">
+      <div class="bg-white rounded-2xl shadow-xl p-12">
+        <i class="fas fa-history text-8xl text-gray-300 mb-6"></i>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Aucune prédiction trouvée</h2>
+        <p class="text-lg text-gray-600 mb-8">Créez votre première prédiction pour commencer à suivre votre santé</p>
+        <a href="/dashboard" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+          <i class="fas fa-plus mr-2"></i>Créer une Prédiction
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let allPredictions = [];
+    let filteredPredictions = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    // Check authentication and load data
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user'));
+      
+      if (!token || !user) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      currentUser = user;
+      updateUserInterface();
+      loadHistory();
+      
+      // Add event listeners for filters
+      document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+      document.getElementById('periodFilter').addEventListener('change', applyFilters);
+    });
+
+    // Update user interface
+    function updateUserInterface() {
+      document.getElementById('userInfo').textContent = `Bonjour ${currentUser.name}`;
+    }
+
+    // Load history data
+    async function loadHistory() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:7777/predictions', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          allPredictions = data.predictions;
+          if (allPredictions.length === 0) {
+            showEmptyState();
+          } else {
+            applyFilters();
+          }
+        } else {
+          showNotification('Erreur lors du chargement de l\'historique', 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion lors du chargement de l\'historique', 'error');
+      }
+    }
+
+    // Show empty state
+    function showEmptyState() {
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('historyContent').classList.add('hidden');
+      document.getElementById('emptyState').classList.remove('hidden');
+    }
+
+    // Apply filters
+    function applyFilters() {
+      const categoryFilter = document.getElementById('categoryFilter').value;
+      const periodFilter = document.getElementById('periodFilter').value;
+      
+      filteredPredictions = allPredictions.filter(pred => {
+        // Category filter
+        if (categoryFilter && pred.prediction_data.prediction !== categoryFilter) {
+          return false;
+        }
+        
+        // Period filter
+        if (periodFilter) {
+          const days = parseInt(periodFilter);
+          const predDate = new Date(pred.created_at);
+          const cutoffDate = new Date();
+          cutoffDate.setDate(cutoffDate.getDate() - days);
+          
+          if (predDate < cutoffDate) {
+            return false;
+          }
+        }
+        
+        return true;
+      });
+      
+      currentPage = 1;
+      displayHistory();
+    }
+
+    // Display history
+    function displayHistory() {
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('historyContent').classList.remove('hidden');
+      document.getElementById('emptyState').classList.add('hidden');
+      
+      // Update summary
+      document.getElementById('totalPredictions').textContent = allPredictions.length;
+      document.getElementById('historySummary').textContent = `${allPredictions.length} prédiction${allPredictions.length > 1 ? 's' : ''} au total`;
+      document.getElementById('filteredCount').textContent = filteredPredictions.length;
+      
+      // Calculate pagination
+      const totalPages = Math.ceil(filteredPredictions.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pagePredictions = filteredPredictions.slice(startIndex, endIndex);
+      
+      // Display predictions
+      displayPredictionsList(pagePredictions);
+      
+      // Display pagination
+      displayPagination(totalPages);
+    }
+
+    // Display predictions list
+    function displayPredictionsList(predictions) {
+      const predictionsList = document.getElementById('predictionsList');
+      
+      if (predictions.length === 0) {
+        predictionsList.innerHTML = `
+          <div class="text-center py-12 bg-white rounded-2xl shadow-xl">
+            <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun résultat</h3>
+            <p class="text-gray-600">Aucune prédiction ne correspond à vos critères de filtrage</p>
+          </div>
+        `;
+        return;
+      }
+      
+      predictionsList.innerHTML = predictions.map((pred, index) => {
+        const globalIndex = (currentPage - 1) * itemsPerPage + index + 1;
+        const createdDate = new Date(pred.created_at).toLocaleDateString('fr-FR');
+        const createdTime = new Date(pred.created_at).toLocaleTimeString('fr-FR');
+        const prediction = pred.prediction_data;
+        
+        // Calculate BMI
+        const bmi = (prediction.Weight / (prediction.Height * prediction.Height)).toFixed(1);
+        
+        // Get prediction result
+        const predictionResult = prediction.prediction || 'Unknown';
+        const categories = {
+          'Insufficient_Weight': { color: 'text-blue-600', bg: 'bg-blue-100', desc: 'Poids Insuffisant' },
+          'Normal_Weight': { color: 'text-green-600', bg: 'bg-green-100', desc: 'Poids Normal' },
+          'Overweight_Level_I': { color: 'text-yellow-600', bg: 'bg-yellow-100', desc: 'Surpoids Niveau I' },
+          'Overweight_Level_II': { color: 'text-orange-600', bg: 'bg-orange-100', desc: 'Surpoids Niveau II' },
+          'Obesity_Type_I': { color: 'text-red-600', bg: 'bg-red-100', desc: 'Obésité Type I' },
+          'Obesity_Type_II': { color: 'text-red-700', bg: 'bg-red-200', desc: 'Obésité Type II' },
+          'Obesity_Type_III': { color: 'text-red-800', bg: 'bg-red-300', desc: 'Obésité Type III' }
+        };
+        
+        const category = categories[predictionResult] || { color: 'text-gray-600', bg: 'bg-gray-100', desc: predictionResult };
+        
+        return `
+          <div class="card-hover bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h4 class="text-xl font-semibold text-gray-900">Prédiction #${globalIndex}</h4>
+                <p class="text-sm text-gray-600">${createdDate} à ${createdTime}</p>
+              </div>
+              <div class="text-right">
+                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${category.bg} ${category.color} mb-2">
+                  ${category.desc}
+                </div>
+                <p class="text-sm text-gray-600">IMC: ${bmi}</p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+              <div class="flex justify-between">
+                <span class="font-medium text-gray-600">Genre:</span>
+                <span class="text-gray-900">${prediction.Gender === 'Male' ? 'Homme' : 'Femme'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="font-medium text-gray-600">Âge:</span>
+                <span class="text-gray-900">${prediction.Age} ans</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="font-medium text-gray-600">Taille:</span>
+                <span class="text-gray-900">${prediction.Height}m</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="font-medium text-gray-600">Poids:</span>
+                <span class="text-gray-900">${prediction.Weight}kg</span>
+              </div>
+            </div>
+            
+            <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+              <div class="flex space-x-3">
+                <button onclick="viewPredictionDetails('${pred._id}')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                  <i class="fas fa-eye mr-1"></i>Détails
+                </button>
+                <button onclick="duplicatePrediction('${pred._id}')" class="text-green-600 hover:text-green-800 text-sm font-medium">
+                  <i class="fas fa-copy mr-1"></i>Dupliquer
+                </button>
+              </div>
+              <button onclick="deletePrediction('${pred._id}')" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                <i class="fas fa-trash mr-1"></i>Supprimer
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Display pagination
+    function displayPagination(totalPages) {
+      const pagination = document.getElementById('pagination');
+      
+      if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+      }
+      
+      let paginationHTML = '<div class="flex space-x-2">';
+      
+      // Previous button
+      if (currentPage > 1) {
+        paginationHTML += `
+          <button onclick="changePage(${currentPage - 1})" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            <i class="fas fa-chevron-left mr-1"></i>Précédent
+          </button>
+        `;
+      }
+      
+      // Page numbers
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === currentPage) {
+          paginationHTML += `
+            <button class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md">
+              ${i}
+            </button>
+          `;
+        } else {
+          paginationHTML += `
+            <button onclick="changePage(${i})" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+              ${i}
+            </button>
+          `;
+        }
+      }
+      
+      // Next button
+      if (currentPage < totalPages) {
+        paginationHTML += `
+          <button onclick="changePage(${currentPage + 1})" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            Suivant<i class="fas fa-chevron-right ml-1"></i>
+          </button>
+        `;
+      }
+      
+      paginationHTML += '</div>';
+      pagination.innerHTML = paginationHTML;
+    }
+
+    // Change page
+    function changePage(page) {
+      currentPage = page;
+      displayHistory();
+    }
+
+    // Refresh history
+    function refreshHistory() {
+      loadHistory();
+    }
+
+    // View prediction details
+    async function viewPredictionDetails(predictId) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showPredictionModal(data.prediction);
+        } else {
+          showNotification('Erreur lors du chargement des détails', 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion', 'error');
+      }
+    }
+
+    // Show prediction modal
+    function showPredictionModal(prediction) {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4';
+      modal.innerHTML = `
+        <div class="bg-white rounded-2xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-semibold text-gray-900">Détails de la Prédiction</h3>
+            <button onclick="this.closest('.fixed').remove()" class="text-gray-600 hover:text-gray-800">
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+          
+          <div class="space-y-6">
+            <div class="grid grid-cols-2 gap-4">
+              <div><strong>Date:</strong> ${new Date(prediction.created_at).toLocaleString('fr-FR')}</div>
+              <div><strong>ID:</strong> ${prediction._id}</div>
+            </div>
+            
+            <div class="bg-gray-50 rounded-lg p-6">
+              <h4 class="text-lg font-semibold mb-4">Données de Santé</h4>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Genre:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.Gender}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Âge:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.Age} ans</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Taille:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.Height}m</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Poids:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.Weight}kg</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Antécédents familiaux:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.family_history_with_overweight}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Aliments caloriques:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.FAVC}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Légumes:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.FCVC}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Repas principaux:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.NCP}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Collations:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.CAEC}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Fumeur:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.SMOKE}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Eau:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.CH2O}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Surveillance calories:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.SCC}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Activité physique:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.FAF}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Temps écrans:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.TUE}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Alcool:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.CALC}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-medium text-gray-600">Transport:</span>
+                  <span class="text-gray-900">${prediction.prediction_data.MTRANS}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+    }
+
+    // Duplicate prediction
+    async function duplicatePrediction(predictId) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Redirect to dashboard with form pre-filled
+          const pred = data.prediction.prediction_data;
+          const formData = {
+            Gender: pred.Gender,
+            Age: pred.Age,
+            Height: pred.Height,
+            Weight: pred.Weight,
+            family_history_with_overweight: pred.family_history_with_overweight,
+            FAVC: pred.FAVC,
+            FCVC: pred.FCVC,
+            NCP: pred.NCP,
+            CAEC: pred.CAEC,
+            SMOKE: pred.SMOKE,
+            CH2O: pred.CH2O,
+            SCC: pred.SCC,
+            FAF: pred.FAF,
+            TUE: pred.TUE,
+            CALC: pred.CALC,
+            MTRANS: pred.MTRANS
+          };
+          
+          localStorage.setItem('duplicateFormData', JSON.stringify(formData));
+          window.location.href = '/dashboard';
+        } else {
+          showNotification('Erreur lors de la duplication', 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion', 'error');
+      }
+    }
+
+    // Delete prediction
+    async function deletePrediction(predictId) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer cette prédiction ?')) {
+        return;
+      }
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showNotification('Prédiction supprimée avec succès', 'success');
+          // Reload history
+          loadHistory();
+        } else {
+          showNotification('Erreur lors de la suppression: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion: ' + error.message, 'error');
+      }
+    }
+
+    // Export history
+    function exportHistory() {
+      const csvContent = createCSV(filteredPredictions);
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `obesitrack_historique_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showNotification('Historique exporté avec succès', 'success');
+    }
+
+    // Create CSV content
+    function createCSV(predictions) {
+      const headers = [
+        'Date', 'Genre', 'Âge', 'Taille', 'Poids', 'IMC', 'Antécédents familiaux',
+        'Aliments caloriques', 'Légumes', 'Repas principaux', 'Collations', 'Fumeur',
+        'Eau', 'Surveillance calories', 'Activité physique', 'Temps écrans', 'Alcool', 'Transport'
+      ];
+      
+      const rows = predictions.map(pred => {
+        const data = pred.prediction_data;
+        const bmi = (data.Weight / (data.Height * data.Height)).toFixed(1);
+        const date = new Date(pred.created_at).toLocaleString('fr-FR');
+        
+        return [
+          date, data.Gender, data.Age, data.Height, data.Weight, bmi,
+          data.family_history_with_overweight, data.FAVC, data.FCVC, data.NCP,
+          data.CAEC, data.SMOKE, data.CH2O, data.SCC, data.FAF, data.TUE,
+          data.CALC, data.MTRANS
+        ];
+      });
+      
+      return [headers, ...rows].map(row => 
+        row.map(field => `"${field}"`).join(',')
+      ).join('\n');
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
+
+    // Notification system
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+      const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+      
+      notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${bgColor} text-white`;
+      notification.innerHTML = `
+        <div class="flex items-center">
+          <i class="fas ${icon} mr-2"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
