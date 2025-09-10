@@ -77,6 +77,18 @@ def statistics_page(request: Request):
 def history_page(request: Request):
     return templates.TemplateResponse("History.html", {"request": request})
 
+@app.get("/admin")
+def admin_page(request: Request):
+    return templates.TemplateResponse("AdminDashboard.html", {"request": request})
+
+@app.get("/admin/users/add")
+def add_user_page(request: Request):
+    return templates.TemplateResponse("User/AjouterUser.html", {"request": request})
+
+@app.get("/admin/users/edit/{user_email}")
+def edit_user_page(request: Request, user_email: str):
+    return templates.TemplateResponse("User/ModifierUser.html", {"request": request, "user_email": user_email})
+
 
 @app.post("/signup")
 def signup(user: UserSignup):
@@ -300,3 +312,244 @@ def get_all_results_admin(current_user: dict = Depends(get_current_user), limit:
         }
     except Exception as e:
         return {"error": f"Erreur lors de la récupération des résultats admin: {str(e)}"}
+
+@app.get("/admin/users")
+def get_all_users_admin(current_user: dict = Depends(get_current_user)):
+    """Récupérer tous les utilisateurs pour l'admin"""
+    try:
+        # Vérifier si l'utilisateur est admin
+        from models.Connection import collection
+        user = collection.find_one({"email": current_user['email']})
+        if not user or user.get("Role") != "admin":
+            return {"error": "Accès non autorisé - Admin requis"}
+        
+        # Récupérer tous les utilisateurs (sans les mots de passe)
+        users = list(collection.find({}, {"password": 0}))
+        
+        # Convertir ObjectId en string
+        for user in users:
+            user["_id"] = str(user["_id"])
+        
+        return {
+            "users": users,
+            "count": len(users),
+            "admin_user": current_user['email']
+        }
+    except Exception as e:
+        return {"error": f"Erreur lors de la récupération des utilisateurs: {str(e)}"}
+
+@app.get("/admin/user/{user_email}/results")
+def get_user_results_admin(user_email: str, current_user: dict = Depends(get_current_user)):
+    """Récupérer les résultats d'un utilisateur spécifique pour l'admin"""
+    try:
+        # Vérifier si l'utilisateur est admin
+        from models.Connection import collection
+        user = collection.find_one({"email": current_user['email']})
+        if not user or user.get("Role") != "admin":
+            return {"error": "Accès non autorisé - Admin requis"}
+        
+        # Récupérer les résultats de l'utilisateur spécifique
+        results = get_user_results(user_email, limit=100)
+        
+        return {
+            "results": results,
+            "count": len(results),
+            "user_email": user_email,
+            "admin_user": current_user['email']
+        }
+    except Exception as e:
+        return {"error": f"Erreur lors de la récupération des résultats de l'utilisateur: {str(e)}"}
+
+@app.get("/admin/statistics")
+def get_admin_statistics(current_user: dict = Depends(get_current_user)):
+    """Récupérer les statistiques globales pour l'admin"""
+    try:
+        # Vérifier si l'utilisateur est admin
+        from models.Connection import collection
+        user = collection.find_one({"email": current_user['email']})
+        if not user or user.get("Role") != "admin":
+            return {"error": "Accès non autorisé - Admin requis"}
+        
+        # Statistiques des utilisateurs
+        total_users = collection.count_documents({})
+        admin_users = collection.count_documents({"Role": "admin"})
+        regular_users = collection.count_documents({"Role": "user"})
+        
+        # Statistiques des prédictions
+        from models.Connection import collection_result
+        total_predictions = collection_result.count_documents({})
+        
+        # Distribution des catégories
+        pipeline = [
+            {"$group": {"_id": "$prediction", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}}
+        ]
+        category_distribution = list(collection_result.aggregate(pipeline))
+        
+        # Utilisateurs les plus actifs
+        user_activity_pipeline = [
+            {"$group": {"_id": "$user_id", "prediction_count": {"$sum": 1}}},
+            {"$sort": {"prediction_count": -1}},
+            {"$limit": 10}
+        ]
+        most_active_users = list(collection_result.aggregate(user_activity_pipeline))
+        
+        return {
+            "user_stats": {
+                "total_users": total_users,
+                "admin_users": admin_users,
+                "regular_users": regular_users
+            },
+            "prediction_stats": {
+                "total_predictions": total_predictions,
+                "category_distribution": category_distribution,
+                "most_active_users": most_active_users
+            },
+            "admin_user": current_user['email']
+        }
+    except Exception as e:
+        return {"error": f"Erreur lors de la récupération des statistiques: {str(e)}"}
+
+@app.post("/admin/users")
+def create_user_admin(user_data: dict, current_user: dict = Depends(get_current_user)):
+    """Créer un nouvel utilisateur (admin seulement)"""
+    try:
+        # Vérifier si l'utilisateur est admin
+        from models.Connection import collection
+        user = collection.find_one({"email": current_user['email']})
+        if not user or user.get("Role") != "admin":
+            return {"error": "Accès non autorisé - Admin requis"}
+        
+        # Extraire les données
+        email = user_data.get("email")
+        name = user_data.get("name")
+        password = user_data.get("password")
+        role = user_data.get("role", "user")
+        
+        if not email or not name or not password:
+            return {"error": "Email, nom et mot de passe requis"}
+        
+        # Vérifier si l'utilisateur existe déjà
+        if collection.find_one({"email": email}):
+            return {"error": "Un utilisateur avec cet email existe déjà"}
+        
+        # Créer l'utilisateur
+        result = create_user(email, name, password, role)
+        
+        return {
+            "message": "Utilisateur créé avec succès",
+            "user": {
+                "email": email,
+                "name": name,
+                "role": role
+            }
+        }
+    except Exception as e:
+        return {"error": f"Erreur lors de la création de l'utilisateur: {str(e)}"}
+
+@app.put("/admin/users/{user_email}")
+def update_user_admin(user_email: str, user_data: dict, current_user: dict = Depends(get_current_user)):
+    """Modifier un utilisateur (admin seulement)"""
+    try:
+        # Vérifier si l'utilisateur est admin
+        from models.Connection import collection
+        admin_user = collection.find_one({"email": current_user['email']})
+        if not admin_user or admin_user.get("Role") != "admin":
+            return {"error": "Accès non autorisé - Admin requis"}
+        
+        # Vérifier si l'utilisateur à modifier existe
+        user_to_update = collection.find_one({"email": user_email})
+        if not user_to_update:
+            return {"error": "Utilisateur non trouvé"}
+        
+        # Préparer les données de mise à jour
+        update_data = {}
+        
+        if "name" in user_data:
+            update_data["name"] = user_data["name"]
+        
+        if "role" in user_data:
+            update_data["Role"] = user_data["role"]
+        
+        if "password" in user_data and user_data["password"]:
+            import bcrypt
+            hashed_password = bcrypt.hashpw(user_data["password"].encode('utf-8'), bcrypt.gensalt())
+            update_data["password"] = hashed_password
+        
+        # Mettre à jour l'utilisateur
+        collection.update_one(
+            {"email": user_email},
+            {"$set": update_data}
+        )
+        
+        # Récupérer l'utilisateur mis à jour
+        updated_user = collection.find_one({"email": user_email}, {"password": 0})
+        updated_user["_id"] = str(updated_user["_id"])
+        
+        return {
+            "message": "Utilisateur mis à jour avec succès",
+            "user": updated_user
+        }
+    except Exception as e:
+        return {"error": f"Erreur lors de la mise à jour de l'utilisateur: {str(e)}"}
+
+@app.delete("/admin/users/{user_email}")
+def delete_user_admin(user_email: str, current_user: dict = Depends(get_current_user)):
+    """Supprimer un utilisateur (admin seulement)"""
+    try:
+        # Vérifier si l'utilisateur est admin
+        from models.Connection import collection, collection_result, collection_predict
+        admin_user = collection.find_one({"email": current_user['email']})
+        if not admin_user or admin_user.get("Role") != "admin":
+            return {"error": "Accès non autorisé - Admin requis"}
+        
+        # Vérifier si l'utilisateur à supprimer existe
+        user_to_delete = collection.find_one({"email": user_email})
+        if not user_to_delete:
+            return {"error": "Utilisateur non trouvé"}
+        
+        # Empêcher la suppression de l'admin actuel
+        if user_email == current_user['email']:
+            return {"error": "Vous ne pouvez pas supprimer votre propre compte"}
+        
+        # Supprimer l'utilisateur et toutes ses données associées
+        # 1. Supprimer les prédictions
+        collection_predict.delete_many({"user_id": user_email})
+        
+        # 2. Supprimer les résultats
+        collection_result.delete_many({"user_id": user_email})
+        
+        # 3. Supprimer l'utilisateur
+        result = collection.delete_one({"email": user_email})
+        
+        if result.deleted_count > 0:
+            return {"message": "Utilisateur et toutes ses données supprimés avec succès"}
+        else:
+            return {"error": "Erreur lors de la suppression de l'utilisateur"}
+    except Exception as e:
+        return {"error": f"Erreur lors de la suppression de l'utilisateur: {str(e)}"}
+
+@app.get("/admin/users/{user_email}")
+def get_user_admin(user_email: str, current_user: dict = Depends(get_current_user)):
+    """Récupérer les détails d'un utilisateur (admin seulement)"""
+    try:
+        # Vérifier si l'utilisateur est admin
+        from models.Connection import collection
+        admin_user = collection.find_one({"email": current_user['email']})
+        if not admin_user or admin_user.get("Role") != "admin":
+            return {"error": "Accès non autorisé - Admin requis"}
+        
+        # Récupérer l'utilisateur (sans le mot de passe)
+        user = collection.find_one({"email": user_email}, {"password": 0})
+        
+        if not user:
+            return {"error": "Utilisateur non trouvé"}
+        
+        user["_id"] = str(user["_id"])
+        
+        return {
+            "user": user,
+            "admin_user": current_user['email']
+        }
+    except Exception as e:
+        return {"error": f"Erreur lors de la récupération de l'utilisateur: {str(e)}"}

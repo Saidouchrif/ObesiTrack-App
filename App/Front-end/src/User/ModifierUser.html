@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modifier un Utilisateur - ObesiTrack Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+    .admin-gradient { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <i class="fas fa-shield-alt text-3xl text-red-600 mr-3"></i>
+            <h1 class="text-2xl font-bold text-gray-900">ObesiTrack Admin</h1>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="/admin" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-arrow-left mr-1"></i>Retour
+          </a>
+          <span id="adminInfo" class="text-gray-700 px-3 py-2 text-sm"></span>
+          <button onclick="logout()" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-sign-out-alt mr-1"></i>Déconnexion
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="admin-gradient rounded-2xl p-8 mb-8 text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold mb-2">
+            <i class="fas fa-user-edit mr-3"></i>
+            Modifier un Utilisateur
+          </h1>
+          <p class="text-xl text-gray-200">Modifier les informations d'un utilisateur</p>
+        </div>
+        <div class="text-right">
+          <div class="text-4xl font-bold">
+            <i class="fas fa-user-edit"></i>
+          </div>
+          <div class="text-gray-200">Modification</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="text-center py-12">
+      <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i>
+      <p class="text-lg font-semibold">Chargement des informations utilisateur...</p>
+      <p class="text-gray-600">Récupération des données</p>
+    </div>
+
+    <!-- Form Card -->
+    <div id="formCard" class="bg-white rounded-2xl shadow-xl p-8 hidden">
+      <form id="editUserForm" class="space-y-6">
+        <!-- Personal Information -->
+        <div class="border-b border-gray-200 pb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-user mr-2"></i>Informations Personnelles
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Name -->
+            <div>
+              <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-user mr-1"></i>Nom complet *
+              </label>
+              <input 
+                type="text" 
+                id="name" 
+                name="name"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                placeholder="Ex: Jean Dupont"
+              >
+            </div>
+
+            <!-- Email (Read-only) -->
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-envelope mr-1"></i>Adresse email
+              </label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email"
+                readonly
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
+                placeholder="Email de l'utilisateur"
+              >
+              <p class="text-xs text-gray-500 mt-1">
+                <i class="fas fa-info-circle mr-1"></i>
+                L'email ne peut pas être modifié
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security Information -->
+        <div class="border-b border-gray-200 pb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-lock mr-2"></i>Informations de Sécurité
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Password -->
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-key mr-1"></i>Nouveau mot de passe
+              </label>
+              <div class="relative">
+                <input 
+                  type="password" 
+                  id="password" 
+                  name="password"
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                  placeholder="Laisser vide pour ne pas changer"
+                >
+                <button 
+                  type="button" 
+                  onclick="togglePassword('password')"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  <i class="fas fa-eye" id="passwordIcon"></i>
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">Laisser vide pour conserver le mot de passe actuel</p>
+            </div>
+
+            <!-- Confirm Password -->
+            <div>
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-key mr-1"></i>Confirmer le nouveau mot de passe
+              </label>
+              <div class="relative">
+                <input 
+                  type="password" 
+                  id="confirmPassword" 
+                  name="confirmPassword"
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                  placeholder="Confirmer le nouveau mot de passe"
+                >
+                <button 
+                  type="button" 
+                  onclick="togglePassword('confirmPassword')"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  <i class="fas fa-eye" id="confirmPasswordIcon"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Role Information -->
+        <div class="pb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-user-shield mr-2"></i>Rôle et Permissions
+          </h3>
+          
+          <div>
+            <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-crown mr-1"></i>Rôle de l'utilisateur *
+            </label>
+            <select 
+              id="role" 
+              name="role"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+            >
+              <option value="">Sélectionner un rôle</option>
+              <option value="user">Utilisateur</option>
+              <option value="admin">Administrateur</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">
+              <i class="fas fa-info-circle mr-1"></i>
+              Les administrateurs ont accès au tableau de bord d'administration
+            </p>
+          </div>
+        </div>
+
+        <!-- User Statistics -->
+        <div class="bg-gray-50 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-chart-bar mr-2"></i>Statistiques de l'Utilisateur
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-blue-600" id="userPredictions">0</div>
+              <div class="text-sm text-gray-600">Prédictions</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-green-600" id="userResults">0</div>
+              <div class="text-sm text-gray-600">Résultats</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-purple-600" id="userRole">-</div>
+              <div class="text-sm text-gray-600">Rôle actuel</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-between pt-6 border-t border-gray-200">
+          <button 
+            type="button" 
+            onclick="deleteUser()"
+            id="deleteButton"
+            class="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition duration-300"
+          >
+            <i class="fas fa-trash mr-2"></i>Supprimer l'Utilisateur
+          </button>
+          
+          <div class="flex space-x-4">
+            <button 
+              type="button" 
+              onclick="window.location.href='/admin'"
+              class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition duration-300"
+            >
+              <i class="fas fa-times mr-2"></i>Annuler
+            </button>
+            <button 
+              type="submit" 
+              class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-300"
+            >
+              <i class="fas fa-save mr-2"></i>Sauvegarder les Modifications
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="hidden text-center py-12">
+      <div class="bg-white rounded-2xl shadow-xl p-12">
+        <i class="fas fa-exclamation-triangle text-8xl text-red-300 mb-6"></i>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Utilisateur non trouvé</h2>
+        <p class="text-lg text-gray-600 mb-8">L'utilisateur que vous essayez de modifier n'existe pas</p>
+        <a href="/admin" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+          <i class="fas fa-arrow-left mr-2"></i>Retour à l'Administration
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 text-center">
+      <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i>
+      <p class="text-lg font-semibold">Sauvegarde des modifications...</p>
+      <p class="text-gray-600">Veuillez patienter</p>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 hidden" onclick="closeConfirmationModalOnBackdrop(event)">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full" onclick="event.stopPropagation()">
+      <div class="text-center">
+        <!-- Icon -->
+        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+          <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-semibold text-gray-900 mb-2" id="confirmationTitle">
+          Confirmer la suppression
+        </h3>
+        
+        <!-- Message -->
+        <p class="text-gray-600 mb-6" id="confirmationMessage">
+          Êtes-vous sûr de vouloir supprimer cet utilisateur ?
+        </p>
+        
+        <!-- Warning -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div class="flex items-start">
+            <i class="fas fa-info-circle text-red-500 mt-0.5 mr-2"></i>
+            <div class="text-sm text-red-700">
+              <p class="font-medium">Cette action est irréversible !</p>
+              <p class="mt-1">Toutes les prédictions et données associées à cet utilisateur seront également supprimées.</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="flex space-x-4">
+          <button 
+            onclick="closeConfirmationModal()" 
+            class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition duration-300"
+          >
+            <i class="fas fa-times mr-2"></i>Annuler
+          </button>
+          <button 
+            onclick="confirmDelete()" 
+            class="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition duration-300"
+          >
+            <i class="fas fa-trash mr-2"></i>Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentAdmin = null;
+    let currentUser = null;
+    let userEmail = null;
+
+    // Check authentication and load data
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user'));
+      
+      if (!token || !user) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      // Check if user is admin
+      if (user.role !== 'admin') {
+        showNotification('Accès non autorisé - Admin requis', 'error');
+        window.location.href = '/dashboard';
+        return;
+      }
+      
+      currentAdmin = user;
+      updateAdminInterface();
+      
+      // Get user email from URL
+      const pathParts = window.location.pathname.split('/');
+      userEmail = pathParts[pathParts.length - 1];
+      
+      if (userEmail) {
+        loadUserData();
+      } else {
+        showErrorState();
+      }
+      
+      // Add form event listener
+      document.getElementById('editUserForm').addEventListener('submit', handleEditUser);
+    });
+
+    // Update admin interface
+    function updateAdminInterface() {
+      document.getElementById('adminInfo').textContent = `Admin: ${currentAdmin.name}`;
+    }
+
+    // Load user data
+    async function loadUserData() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/admin/users/${userEmail}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          currentUser = data.user;
+          populateForm();
+          loadUserStatistics();
+          document.getElementById('loadingState').classList.add('hidden');
+          document.getElementById('formCard').classList.remove('hidden');
+        } else {
+          showErrorState();
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        showErrorState();
+      }
+    }
+
+    // Populate form with user data
+    function populateForm() {
+      document.getElementById('name').value = currentUser.name || '';
+      document.getElementById('email').value = currentUser.email || '';
+      document.getElementById('role').value = currentUser.Role || currentUser.role || 'user';
+      
+      // Hide delete button if it's the current admin
+      if (currentUser.email === currentAdmin.email) {
+        document.getElementById('deleteButton').style.display = 'none';
+      }
+    }
+
+    // Load user statistics
+    async function loadUserStatistics() {
+      try {
+        const token = localStorage.getItem('token');
+        
+        // Load predictions count
+        const predictionsResponse = await fetch(`http://localhost:7777/admin/user/${userEmail}/results`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (predictionsResponse.ok) {
+          const predictionsData = await predictionsResponse.json();
+          document.getElementById('userPredictions').textContent = predictionsData.count || 0;
+          document.getElementById('userResults').textContent = predictionsData.count || 0;
+        }
+        
+        // Set current role
+        const role = currentUser.Role || currentUser.role || 'user';
+        document.getElementById('userRole').textContent = role === 'admin' ? 'Admin' : 'User';
+        
+      } catch (error) {
+        console.error('Error loading user statistics:', error);
+      }
+    }
+
+    // Show error state
+    function showErrorState() {
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('errorState').classList.remove('hidden');
+    }
+
+    // Toggle password visibility
+    function togglePassword(fieldId) {
+      const field = document.getElementById(fieldId);
+      const icon = document.getElementById(fieldId + 'Icon');
+      
+      if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        field.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    // Handle form submission
+    async function handleEditUser(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const userData = {
+        name: formData.get('name'),
+        password: formData.get('password'),
+        confirmPassword: formData.get('confirmPassword'),
+        role: formData.get('role')
+      };
+      
+      // Validation
+      if (userData.password && userData.password !== userData.confirmPassword) {
+        showNotification('Les mots de passe ne correspondent pas', 'error');
+        return;
+      }
+      
+      if (userData.password && userData.password.length < 6) {
+        showNotification('Le mot de passe doit contenir au moins 6 caractères', 'error');
+        return;
+      }
+      
+      // Show loading
+      document.getElementById('loadingOverlay').classList.remove('hidden');
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/admin/users/${userEmail}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: userData.name,
+            password: userData.password || undefined,
+            role: userData.role
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showNotification('Utilisateur mis à jour avec succès!', 'success');
+          
+          // Redirect to admin dashboard after a short delay
+          setTimeout(() => {
+            window.location.href = '/admin';
+          }, 2000);
+        } else {
+          showNotification('Erreur: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion: ' + error.message, 'error');
+      } finally {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+      }
+    }
+
+    // Delete user
+    function deleteUser() {
+      // Update modal content
+      document.getElementById('confirmationTitle').textContent = 'Confirmer la suppression';
+      document.getElementById('confirmationMessage').textContent = `Êtes-vous sûr de vouloir supprimer l'utilisateur "${currentUser.name}" ?`;
+      
+      // Show modal
+      document.getElementById('confirmationModal').classList.remove('hidden');
+    }
+
+    // Confirm delete
+    async function confirmDelete() {
+      // Show loading
+      document.getElementById('loadingOverlay').classList.remove('hidden');
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/admin/users/${userEmail}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showNotification('Utilisateur supprimé avec succès!', 'success');
+          
+          // Redirect to admin dashboard after a short delay
+          setTimeout(() => {
+            window.location.href = '/admin';
+          }, 2000);
+        } else {
+          showNotification('Erreur: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion: ' + error.message, 'error');
+      } finally {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+        closeConfirmationModal();
+      }
+    }
+
+    // Close confirmation modal
+    function closeConfirmationModal() {
+      document.getElementById('confirmationModal').classList.add('hidden');
+    }
+
+    // Close confirmation modal on backdrop click
+    function closeConfirmationModalOnBackdrop(event) {
+      if (event.target === event.currentTarget) {
+        closeConfirmationModal();
+      }
+    }
+
+    // Handle escape key
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeConfirmationModal();
+      }
+    });
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
+
+    // Notification system
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+      const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+      
+      notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${bgColor} text-white`;
+      notification.innerHTML = `
+        <div class="flex items-center">
+          <i class="fas ${icon} mr-2"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

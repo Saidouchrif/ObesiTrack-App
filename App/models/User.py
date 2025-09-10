@@ -25,8 +25,16 @@ def authenticate_user(email: str, password: str):
     )
     
     # Retour du token avec les informations utilisateur
+    # Vérifier le rôle avec différentes variantes possibles
+    user_role = user.get("Role") or user.get("role") or "user"
+    
+    # Debug: afficher les informations de l'utilisateur
+    print(f"🔍 Debug - Utilisateur trouvé: {user}")
+    print(f"🔍 Debug - Rôle extrait: {user_role}")
+    
     return {
         "name": user["name"],
         "email": user["email"],
+        "role": user_role,
         "token": access_token
     }

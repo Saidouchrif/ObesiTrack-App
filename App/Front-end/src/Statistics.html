@@ -230,6 +230,16 @@
     // Update user interface
     function updateUserInterface() {
       document.getElementById('userInfo').textContent = `Bonjour ${currentUser.name}`;
+      
+      // Add admin link if user is admin
+      if (currentUser.role === 'admin') {
+        const nav = document.querySelector('nav .flex.items-center.space-x-4');
+        const adminLink = document.createElement('a');
+        adminLink.href = '/admin';
+        adminLink.className = 'text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium';
+        adminLink.innerHTML = '<i class="fas fa-shield-alt mr-1"></i>Administration';
+        nav.insertBefore(adminLink, nav.querySelector('#userInfo'));
+      }
     }
 
     // Load statistics data

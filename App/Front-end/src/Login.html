@@ -197,15 +197,20 @@
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify({
             name: data.name,
-            email: data.email
+            email: data.email,
+            role: data.role
           }));
           
           // Show success message
           showNotification('Connexion réussie !', 'success');
           
-          // Redirect to dashboard
+          // Redirect based on user role
           setTimeout(() => {
-            window.location.href = '/dashboard';
+            if (data.role === 'admin') {
+              window.location.href = '/admin';
+            } else {
+              window.location.href = '/dashboard';
+            }
           }, 1500);
         } else {
           showNotification('Erreur de connexion: ' + data.detail, 'error');

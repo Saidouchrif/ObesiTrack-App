@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajouter un Utilisateur - ObesiTrack Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+    .admin-gradient { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <i class="fas fa-shield-alt text-3xl text-red-600 mr-3"></i>
+            <h1 class="text-2xl font-bold text-gray-900">ObesiTrack Admin</h1>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="/admin" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-arrow-left mr-1"></i>Retour
+          </a>
+          <span id="adminInfo" class="text-gray-700 px-3 py-2 text-sm"></span>
+          <button onclick="logout()" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-sign-out-alt mr-1"></i>Déconnexion
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="admin-gradient rounded-2xl p-8 mb-8 text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold mb-2">
+            <i class="fas fa-user-plus mr-3"></i>
+            Ajouter un Utilisateur
+          </h1>
+          <p class="text-xl text-gray-200">Créer un nouveau compte utilisateur</p>
+        </div>
+        <div class="text-right">
+          <div class="text-4xl font-bold">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <div class="text-gray-200">Nouvel utilisateur</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+      <form id="addUserForm" class="space-y-6">
+        <!-- Personal Information -->
+        <div class="border-b border-gray-200 pb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-user mr-2"></i>Informations Personnelles
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Name -->
+            <div>
+              <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-user mr-1"></i>Nom complet *
+              </label>
+              <input 
+                type="text" 
+                id="name" 
+                name="name"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                placeholder="Ex: Jean Dupont"
+              >
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-envelope mr-1"></i>Adresse email *
+              </label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                placeholder="Ex: jean.dupont@example.com"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Security Information -->
+        <div class="border-b border-gray-200 pb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-lock mr-2"></i>Informations de Sécurité
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Password -->
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-key mr-1"></i>Mot de passe *
+              </label>
+              <div class="relative">
+                <input 
+                  type="password" 
+                  id="password" 
+                  name="password"
+                  required
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                  placeholder="Mot de passe sécurisé"
+                >
+                <button 
+                  type="button" 
+                  onclick="togglePassword('password')"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  <i class="fas fa-eye" id="passwordIcon"></i>
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">Minimum 6 caractères</p>
+            </div>
+
+            <!-- Confirm Password -->
+            <div>
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-key mr-1"></i>Confirmer le mot de passe *
+              </label>
+              <div class="relative">
+                <input 
+                  type="password" 
+                  id="confirmPassword" 
+                  name="confirmPassword"
+                  required
+                  class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                  placeholder="Confirmer le mot de passe"
+                >
+                <button 
+                  type="button" 
+                  onclick="togglePassword('confirmPassword')"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  <i class="fas fa-eye" id="confirmPasswordIcon"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Role Information -->
+        <div class="pb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-user-shield mr-2"></i>Rôle et Permissions
+          </h3>
+          
+          <div>
+            <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-crown mr-1"></i>Rôle de l'utilisateur *
+            </label>
+            <select 
+              id="role" 
+              name="role"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+            >
+              <option value="">Sélectionner un rôle</option>
+              <option value="user">Utilisateur</option>
+              <option value="admin">Administrateur</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">
+              <i class="fas fa-info-circle mr-1"></i>
+              Les administrateurs ont accès au tableau de bord d'administration
+            </p>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+          <button 
+            type="button" 
+            onclick="window.location.href='/admin'"
+            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition duration-300"
+          >
+            <i class="fas fa-times mr-2"></i>Annuler
+          </button>
+          <button 
+            type="submit" 
+            class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition duration-300"
+          >
+            <i class="fas fa-user-plus mr-2"></i>Créer l'Utilisateur
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 text-center">
+      <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i>
+      <p class="text-lg font-semibold">Création de l'utilisateur...</p>
+      <p class="text-gray-600">Veuillez patienter</p>
+    </div>
+  </div>
+
+  <script>
+    let currentAdmin = null;
+
+    // Check authentication and load data
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user'));
+      
+      if (!token || !user) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      // Check if user is admin
+      if (user.role !== 'admin') {
+        showNotification('Accès non autorisé - Admin requis', 'error');
+        window.location.href = '/dashboard';
+        return;
+      }
+      
+      currentAdmin = user;
+      updateAdminInterface();
+      
+      // Add form event listener
+      document.getElementById('addUserForm').addEventListener('submit', handleAddUser);
+    });
+
+    // Update admin interface
+    function updateAdminInterface() {
+      document.getElementById('adminInfo').textContent = `Admin: ${currentAdmin.name}`;
+    }
+
+    // Toggle password visibility
+    function togglePassword(fieldId) {
+      const field = document.getElementById(fieldId);
+      const icon = document.getElementById(fieldId + 'Icon');
+      
+      if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        field.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    // Handle form submission
+    async function handleAddUser(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const userData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        password: formData.get('password'),
+        confirmPassword: formData.get('confirmPassword'),
+        role: formData.get('role')
+      };
+      
+      // Validation
+      if (userData.password !== userData.confirmPassword) {
+        showNotification('Les mots de passe ne correspondent pas', 'error');
+        return;
+      }
+      
+      if (userData.password.length < 6) {
+        showNotification('Le mot de passe doit contenir au moins 6 caractères', 'error');
+        return;
+      }
+      
+      // Show loading
+      document.getElementById('loadingOverlay').classList.remove('hidden');
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:7777/admin/users', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: userData.name,
+            email: userData.email,
+            password: userData.password,
+            role: userData.role
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showNotification('Utilisateur créé avec succès!', 'success');
+          
+          // Redirect to admin dashboard after a short delay
+          setTimeout(() => {
+            window.location.href = '/admin';
+          }, 2000);
+        } else {
+          showNotification('Erreur: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion: ' + error.message, 'error');
+      } finally {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+      }
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
+
+    // Notification system
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+      const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+      
+      notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${bgColor} text-white`;
+      notification.innerHTML = `
+        <div class="flex items-center">
+          <i class="fas ${icon} mr-2"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

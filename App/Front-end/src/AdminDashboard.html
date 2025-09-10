@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tableau de Bord Administrateur - ObesiTrack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="Images/logoApp.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .glass-effect { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+    .admin-gradient { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <i class="fas fa-shield-alt text-3xl text-red-600 mr-3"></i>
+            <h1 class="text-2xl font-bold text-gray-900">ObesiTrack Admin</h1>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="/dashboard" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-tachometer-alt mr-1"></i>Dashboard
+          </a>
+          <span id="adminInfo" class="text-gray-700 px-3 py-2 text-sm"></span>
+          <button onclick="logout()" class="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium">
+            <i class="fas fa-sign-out-alt mr-1"></i>Déconnexion
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="admin-gradient rounded-2xl p-8 mb-8 text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold mb-2">
+            <i class="fas fa-crown mr-3"></i>
+            Tableau de Bord Administrateur
+          </h1>
+          <p class="text-xl text-gray-200">Gestion des utilisateurs et prédictions</p>
+        </div>
+        <div class="text-right">
+          <div class="text-4xl font-bold" id="totalUsers">0</div>
+          <div class="text-gray-200">Utilisateurs total</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white rounded-2xl p-6 shadow-xl">
+        <div class="flex items-center">
+          <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+            <i class="fas fa-users text-2xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Utilisateurs</p>
+            <p class="text-2xl font-bold text-gray-900" id="statsUsers">0</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-2xl p-6 shadow-xl">
+        <div class="flex items-center">
+          <div class="p-3 rounded-full bg-green-100 text-green-600">
+            <i class="fas fa-chart-line text-2xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Prédictions</p>
+            <p class="text-2xl font-bold text-gray-900" id="statsPredictions">0</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-2xl p-6 shadow-xl">
+        <div class="flex items-center">
+          <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+            <i class="fas fa-user-shield text-2xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Admins</p>
+            <p class="text-2xl font-bold text-gray-900" id="statsAdmins">0</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-2xl p-6 shadow-xl">
+        <div class="flex items-center">
+          <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+            <i class="fas fa-chart-pie text-2xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Catégories</p>
+            <p class="text-2xl font-bold text-gray-900" id="statsCategories">7</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white rounded-2xl shadow-xl mb-8">
+      <div class="border-b border-gray-200">
+        <nav class="-mb-px flex space-x-8 px-6">
+          <button onclick="showTab('users')" id="tab-users" class="tab-button py-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600">
+            <i class="fas fa-users mr-2"></i>Utilisateurs
+          </button>
+          <button onclick="showTab('predictions')" id="tab-predictions" class="tab-button py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+            <i class="fas fa-chart-line mr-2"></i>Prédictions
+          </button>
+          <button onclick="showTab('statistics')" id="tab-statistics" class="tab-button py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+            <i class="fas fa-chart-bar mr-2"></i>Statistiques
+          </button>
+        </nav>
+      </div>
+
+      <!-- Users Tab -->
+      <div id="content-users" class="tab-content p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold text-gray-900">Liste des Utilisateurs</h3>
+          <div class="flex gap-2">
+            <input type="text" id="userSearch" placeholder="Rechercher un utilisateur..." class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="window.location.href='/admin/users/add'" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition duration-300">
+              <i class="fas fa-user-plus mr-2"></i>Ajouter
+            </button>
+            <button onclick="refreshUsers()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+              <i class="fas fa-sync-alt mr-2"></i>Actualiser
+            </button>
+          </div>
+        </div>
+        
+        <div id="usersList" class="space-y-4">
+          <!-- Will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Predictions Tab -->
+      <div id="content-predictions" class="tab-content p-6 hidden">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold text-gray-900">Toutes les Prédictions</h3>
+          <div class="flex gap-2">
+            <select id="predictionFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Toutes les catégories</option>
+              <option value="Insufficient_Weight">Poids Insuffisant</option>
+              <option value="Normal_Weight">Poids Normal</option>
+              <option value="Overweight_Level_I">Surpoids Niveau I</option>
+              <option value="Overweight_Level_II">Surpoids Niveau II</option>
+              <option value="Obesity_Type_I">Obésité Type I</option>
+              <option value="Obesity_Type_II">Obésité Type II</option>
+              <option value="Obesity_Type_III">Obésité Type III</option>
+            </select>
+            <button onclick="refreshPredictions()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+              <i class="fas fa-sync-alt mr-2"></i>Actualiser
+            </button>
+          </div>
+        </div>
+        
+        <div id="predictionsList" class="space-y-4">
+          <!-- Will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Statistics Tab -->
+      <div id="content-statistics" class="tab-content p-6 hidden">
+        <!-- Statistics Header -->
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900">Statistiques Globales</h3>
+            <p class="text-gray-600">Analyse complète de la plateforme ObesiTrack</p>
+          </div>
+          <div class="flex gap-2">
+            <select id="timeFilter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="all">Toutes les périodes</option>
+              <option value="7">7 derniers jours</option>
+              <option value="30">30 derniers jours</option>
+              <option value="90">3 derniers mois</option>
+            </select>
+            <button onclick="refreshStatistics()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+              <i class="fas fa-sync-alt mr-2"></i>Actualiser
+            </button>
+          </div>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <!-- Total Users -->
+          <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-blue-100 text-sm font-medium">Utilisateurs Total</p>
+                <p class="text-3xl font-bold" id="statTotalUsers">0</p>
+                <p class="text-blue-100 text-xs mt-1">
+                  <i class="fas fa-arrow-up mr-1"></i>+12% ce mois
+                </p>
+              </div>
+              <div class="bg-blue-400/20 rounded-full p-3">
+                <i class="fas fa-users text-2xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Predictions -->
+          <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-green-100 text-sm font-medium">Prédictions Total</p>
+                <p class="text-3xl font-bold" id="statTotalPredictions">0</p>
+                <p class="text-green-100 text-xs mt-1">
+                  <i class="fas fa-arrow-up mr-1"></i>+8% ce mois
+                </p>
+              </div>
+              <div class="bg-green-400/20 rounded-full p-3">
+                <i class="fas fa-chart-line text-2xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Users -->
+          <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-purple-100 text-sm font-medium">Utilisateurs Actifs</p>
+                <p class="text-3xl font-bold" id="statActiveUsers">0</p>
+                <p class="text-purple-100 text-xs mt-1">
+                  <i class="fas fa-arrow-up mr-1"></i>+15% ce mois
+                </p>
+              </div>
+              <div class="bg-purple-400/20 rounded-full p-3">
+                <i class="fas fa-user-check text-2xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Average Predictions -->
+          <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-orange-100 text-sm font-medium">Moyenne/Utilisateur</p>
+                <p class="text-3xl font-bold" id="statAvgPredictions">0</p>
+                <p class="text-orange-100 text-xs mt-1">
+                  <i class="fas fa-arrow-up mr-1"></i>+5% ce mois
+                </p>
+              </div>
+              <div class="bg-orange-400/20 rounded-full p-3">
+                <i class="fas fa-chart-bar text-2xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <!-- Category Distribution Chart -->
+          <div class="bg-white rounded-2xl p-6 shadow-xl">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-semibold text-gray-900">Distribution des Catégories</h3>
+              <div class="flex space-x-2">
+                <button onclick="toggleChartType('categoryChart', 'doughnut')" class="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition duration-300">
+                  <i class="fas fa-circle mr-1"></i>Donut
+                </button>
+                <button onclick="toggleChartType('categoryChart', 'bar')" class="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition duration-300">
+                  <i class="fas fa-chart-bar mr-1"></i>Barres
+                </button>
+              </div>
+            </div>
+            <div class="relative h-80">
+              <canvas id="categoryChart"></canvas>
+            </div>
+            <div id="categoryLegend" class="mt-4 flex flex-wrap gap-2">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+          
+          <!-- Predictions Over Time -->
+          <div class="bg-white rounded-2xl p-6 shadow-xl">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-semibold text-gray-900">Évolution des Prédictions</h3>
+              <div class="flex space-x-2">
+                <button onclick="toggleChartType('timeChart', 'line')" class="px-3 py-1 text-xs bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition duration-300">
+                  <i class="fas fa-chart-line mr-1"></i>Ligne
+                </button>
+                <button onclick="toggleChartType('timeChart', 'bar')" class="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition duration-300">
+                  <i class="fas fa-chart-bar mr-1"></i>Barres
+                </button>
+              </div>
+            </div>
+            <div class="relative h-80">
+              <canvas id="timeChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Statistics -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Most Active Users -->
+          <div class="bg-white rounded-2xl p-6 shadow-xl">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-semibold text-gray-900">Top Utilisateurs</h3>
+              <span class="text-sm text-gray-500">Par prédictions</span>
+            </div>
+            <div id="activeUsersList" class="space-y-4">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Category Breakdown -->
+          <div class="bg-white rounded-2xl p-6 shadow-xl">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-semibold text-gray-900">Détail par Catégorie</h3>
+              <span class="text-sm text-gray-500">Pourcentages</span>
+            </div>
+            <div id="categoryBreakdown" class="space-y-4">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- System Health -->
+          <div class="bg-white rounded-2xl p-6 shadow-xl">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-semibold text-gray-900">État du Système</h3>
+              <span class="text-sm text-green-600 font-medium">
+                <i class="fas fa-circle text-green-500 mr-1"></i>Opérationnel
+              </span>
+            </div>
+            <div class="space-y-4">
+              <!-- Database Status -->
+              <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div class="flex items-center">
+                  <i class="fas fa-database text-green-600 mr-3"></i>
+                  <span class="font-medium text-gray-900">Base de données</span>
+                </div>
+                <span class="text-green-600 font-semibold">Connectée</span>
+              </div>
+
+              <!-- API Status -->
+              <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div class="flex items-center">
+                  <i class="fas fa-server text-green-600 mr-3"></i>
+                  <span class="font-medium text-gray-900">API ML</span>
+                </div>
+                <span class="text-green-600 font-semibold">Active</span>
+              </div>
+
+              <!-- Storage Status -->
+              <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div class="flex items-center">
+                  <i class="fas fa-hdd text-green-600 mr-3"></i>
+                  <span class="font-medium text-gray-900">Stockage</span>
+                </div>
+                <span class="text-green-600 font-semibold">Disponible</span>
+              </div>
+
+              <!-- Performance -->
+              <div class="mt-6">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                  <span>Performance</span>
+                  <span>95%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div class="bg-green-500 h-2 rounded-full" style="width: 95%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="mt-8 bg-white rounded-2xl p-6 shadow-xl">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-xl font-semibold text-gray-900">Exporter les Statistiques</h3>
+              <p class="text-gray-600">Téléchargez les données au format CSV ou PDF</p>
+            </div>
+            <div class="flex space-x-3">
+              <button onclick="exportStatistics('csv')" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-300">
+                <i class="fas fa-file-csv mr-2"></i>Exporter CSV
+              </button>
+              <button onclick="exportStatistics('pdf')" class="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition duration-300">
+                <i class="fas fa-file-pdf mr-2"></i>Exporter PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Details Modal -->
+  <div id="userModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 hidden">
+    <div class="bg-white rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-semibold text-gray-900">Détails de l'Utilisateur</h3>
+        <button onclick="closeUserModal()" class="text-gray-600 hover:text-gray-800">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div id="userDetailsContent">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 hidden" onclick="closeConfirmationModalOnBackdrop(event)">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full" onclick="event.stopPropagation()">
+      <div class="text-center">
+        <!-- Icon -->
+        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+          <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-semibold text-gray-900 mb-2" id="confirmationTitle">
+          Confirmer la suppression
+        </h3>
+        
+        <!-- Message -->
+        <p class="text-gray-600 mb-6" id="confirmationMessage">
+          Êtes-vous sûr de vouloir supprimer cet utilisateur ?
+        </p>
+        
+        <!-- Warning -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div class="flex items-start">
+            <i class="fas fa-info-circle text-red-500 mt-0.5 mr-2"></i>
+            <div class="text-sm text-red-700">
+              <p class="font-medium">Cette action est irréversible !</p>
+              <p class="mt-1">Toutes les prédictions et données associées à cet utilisateur seront également supprimées.</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="flex space-x-4">
+          <button 
+            onclick="closeConfirmationModal()" 
+            class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition duration-300"
+          >
+            <i class="fas fa-times mr-2"></i>Annuler
+          </button>
+          <button 
+            onclick="confirmDelete()" 
+            class="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition duration-300"
+          >
+            <i class="fas fa-trash mr-2"></i>Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentAdmin = null;
+    let allUsers = [];
+    let allPredictions = [];
+    let filteredUsers = [];
+    let filteredPredictions = [];
+    let currentTab = 'users';
+
+    // Check authentication and load data
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user'));
+      
+      if (!token || !user) {
+        window.location.href = '/login';
+        return;
+      }
+      
+      // Check if user is admin
+      if (user.role !== 'admin') {
+        showNotification('Accès non autorisé - Admin requis', 'error');
+        window.location.href = '/dashboard';
+        return;
+      }
+      
+      currentAdmin = user;
+      updateAdminInterface();
+      loadStatistics();
+      loadUsers();
+      
+      // Add event listeners
+      document.getElementById('userSearch').addEventListener('input', filterUsers);
+      document.getElementById('predictionFilter').addEventListener('change', filterPredictions);
+    });
+
+    // Update admin interface
+    function updateAdminInterface() {
+      document.getElementById('adminInfo').textContent = `Admin: ${currentAdmin.name}`;
+    }
+
+    // Tab management
+    function showTab(tabName) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+      });
+      
+      // Remove active class from all tabs
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('border-blue-500', 'text-blue-600');
+        button.classList.add('border-transparent', 'text-gray-500');
+      });
+      
+      // Show selected tab content
+      document.getElementById(`content-${tabName}`).classList.remove('hidden');
+      
+      // Add active class to selected tab
+      document.getElementById(`tab-${tabName}`).classList.remove('border-transparent', 'text-gray-500');
+      document.getElementById(`tab-${tabName}`).classList.add('border-blue-500', 'text-blue-600');
+      
+      currentTab = tabName;
+      
+      // Load data for the tab
+      if (tabName === 'predictions' && allPredictions.length === 0) {
+        loadPredictions();
+      } else if (tabName === 'statistics') {
+        loadStatistics();
+      }
+    }
+
+    // Load statistics
+    async function loadStatistics() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:7777/admin/statistics', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          updateStatisticsCards(data);
+          updateCategoryChart(data.prediction_stats.category_distribution);
+          updateActiveUsers(data.prediction_stats.most_active_users);
+          createTimeChart(); // Initialize time chart
+        } else {
+          showNotification('Erreur lors du chargement des statistiques', 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion lors du chargement des statistiques', 'error');
+      }
+    }
+
+    // Update statistics cards
+    function updateStatisticsCards(data) {
+      // Update main dashboard cards
+      document.getElementById('totalUsers').textContent = data.user_stats.total_users;
+      document.getElementById('statsUsers').textContent = data.user_stats.regular_users;
+      document.getElementById('statsPredictions').textContent = data.prediction_stats.total_predictions;
+      document.getElementById('statsAdmins').textContent = data.user_stats.admin_users;
+
+      // Update detailed statistics cards
+      document.getElementById('statTotalUsers').textContent = data.user_stats.total_users;
+      document.getElementById('statTotalPredictions').textContent = data.prediction_stats.total_predictions;
+      document.getElementById('statActiveUsers').textContent = data.user_stats.regular_users;
+      
+      // Calculate average predictions per user
+      const avgPredictions = data.user_stats.total_users > 0 
+        ? Math.round(data.prediction_stats.total_predictions / data.user_stats.total_users * 10) / 10
+        : 0;
+      document.getElementById('statAvgPredictions').textContent = avgPredictions;
+    }
+
+    // Chart instances
+    let categoryChartInstance = null;
+    let timeChartInstance = null;
+
+    // Update category chart
+    function updateCategoryChart(categoryData) {
+      const ctx = document.getElementById('categoryChart').getContext('2d');
+      
+      // Destroy existing chart if it exists
+      if (categoryChartInstance) {
+        categoryChartInstance.destroy();
+      }
+      
+      const labels = categoryData.map(item => {
+        const categoryNames = {
+          'Insufficient_Weight': 'Poids Insuffisant',
+          'Normal_Weight': 'Poids Normal',
+          'Overweight_Level_I': 'Surpoids Niveau I',
+          'Overweight_Level_II': 'Surpoids Niveau II',
+          'Obesity_Type_I': 'Obésité Type I',
+          'Obesity_Type_II': 'Obésité Type II',
+          'Obesity_Type_III': 'Obésité Type III'
+        };
+        return categoryNames[item._id] || item._id;
+      });
+      
+      const counts = categoryData.map(item => item.count);
+      const colors = [
+        '#3B82F6', '#10B981', '#F59E0B', '#EF4444', 
+        '#8B5CF6', '#EC4899', '#06B6D4'
+      ];
+      
+      categoryChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: counts,
+            backgroundColor: colors.slice(0, labels.length),
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = ((context.parsed / total) * 100).toFixed(1);
+                  return `${context.label}: ${context.parsed} (${percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Update category breakdown
+      updateCategoryBreakdown(categoryData, colors);
+    }
+
+    // Update category breakdown
+    function updateCategoryBreakdown(categoryData, colors) {
+      const container = document.getElementById('categoryBreakdown');
+      const total = categoryData.reduce((sum, item) => sum + item.count, 0);
+      
+      container.innerHTML = categoryData.map((item, index) => {
+        const categoryNames = {
+          'Insufficient_Weight': 'Poids Insuffisant',
+          'Normal_Weight': 'Poids Normal',
+          'Overweight_Level_I': 'Surpoids Niveau I',
+          'Overweight_Level_II': 'Surpoids Niveau II',
+          'Obesity_Type_I': 'Obésité Type I',
+          'Obesity_Type_II': 'Obésité Type II',
+          'Obesity_Type_III': 'Obésité Type III'
+        };
+        
+        const name = categoryNames[item._id] || item._id;
+        const percentage = total > 0 ? ((item.count / total) * 100).toFixed(1) : 0;
+        const color = colors[index % colors.length];
+        
+        return `
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+              <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${color}"></div>
+              <span class="font-medium text-gray-900">${name}</span>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-semibold text-gray-900">${item.count}</div>
+              <div class="text-xs text-gray-500">${percentage}%</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Update active users
+    function updateActiveUsers(activeUsers) {
+      const container = document.getElementById('activeUsersList');
+      
+      if (activeUsers.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center">Aucune donnée disponible</p>';
+        return;
+      }
+      
+      container.innerHTML = activeUsers.map((user, index) => {
+        const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32', '#3B82F6', '#10B981'];
+        const rankColor = rankColors[index] || '#6B7280';
+        
+        return `
+          <div class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:shadow-md transition duration-300">
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm" style="background-color: ${rankColor}">
+                ${index + 1}
+              </div>
+              <div class="ml-4">
+                <p class="font-semibold text-gray-900">${user._id}</p>
+                <p class="text-xs text-gray-500">Utilisateur actif</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-lg font-bold text-gray-900">${user.prediction_count}</p>
+              <p class="text-xs text-gray-500">prédictions</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Create time chart
+    function createTimeChart() {
+      const ctx = document.getElementById('timeChart').getContext('2d');
+      
+      // Destroy existing chart if it exists
+      if (timeChartInstance) {
+        timeChartInstance.destroy();
+      }
+      
+      // Generate sample data for the last 7 days
+      const labels = [];
+      const data = [];
+      const today = new Date();
+      
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        labels.push(date.toLocaleDateString('fr-FR', { weekday: 'short' }));
+        data.push(Math.floor(Math.random() * 20) + 5); // Sample data
+      }
+      
+      timeChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Prédictions',
+            data: data,
+            borderColor: '#3B82F6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#3B82F6',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Toggle chart type
+    function toggleChartType(chartId, type) {
+      if (chartId === 'categoryChart' && categoryChartInstance) {
+        categoryChartInstance.config.type = type;
+        categoryChartInstance.update();
+      } else if (chartId === 'timeChart' && timeChartInstance) {
+        timeChartInstance.config.type = type;
+        timeChartInstance.update();
+      }
+    }
+
+    // Export statistics
+    function exportStatistics(format) {
+      if (format === 'csv') {
+        // Create CSV content
+        const csvContent = createStatisticsCSV();
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `obesitrack_statistiques_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showNotification('Statistiques exportées en CSV', 'success');
+      } else if (format === 'pdf') {
+        // For PDF export, we would need a library like jsPDF
+        showNotification('Export PDF en cours de développement', 'info');
+      }
+    }
+
+    // Create statistics CSV
+    function createStatisticsCSV() {
+      const headers = ['Métrique', 'Valeur', 'Date'];
+      const rows = [
+        ['Utilisateurs Total', document.getElementById('statTotalUsers').textContent, new Date().toLocaleDateString('fr-FR')],
+        ['Prédictions Total', document.getElementById('statTotalPredictions').textContent, new Date().toLocaleDateString('fr-FR')],
+        ['Utilisateurs Actifs', document.getElementById('statActiveUsers').textContent, new Date().toLocaleDateString('fr-FR')],
+        ['Moyenne par Utilisateur', document.getElementById('statAvgPredictions').textContent, new Date().toLocaleDateString('fr-FR')]
+      ];
+      
+      return [headers, ...rows].map(row => 
+        row.map(field => `"${field}"`).join(',')
+      ).join('\n');
+    }
+
+    // Refresh statistics
+    function refreshStatistics() {
+      loadStatistics();
+      showNotification('Statistiques actualisées', 'success');
+    }
+
+    // Load users
+    async function loadUsers() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:7777/admin/users', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          allUsers = data.users;
+          filteredUsers = allUsers;
+          displayUsers();
+        } else {
+          showNotification('Erreur lors du chargement des utilisateurs', 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion lors du chargement des utilisateurs', 'error');
+      }
+    }
+
+    // Display users
+    function displayUsers() {
+      const usersList = document.getElementById('usersList');
+      
+      if (filteredUsers.length === 0) {
+        usersList.innerHTML = `
+          <div class="text-center py-12 bg-white rounded-2xl shadow-xl">
+            <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucun utilisateur trouvé</h3>
+            <p class="text-gray-600">Aucun utilisateur ne correspond à votre recherche</p>
+          </div>
+        `;
+        return;
+      }
+      
+      usersList.innerHTML = filteredUsers.map(user => `
+        <div class="card-hover bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+          <div class="flex justify-between items-start">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-xl"></i>
+              </div>
+              <div class="ml-4">
+                <h4 class="text-lg font-semibold text-gray-900">${user.name}</h4>
+                <p class="text-sm text-gray-600">${user.email}</p>
+                <div class="flex items-center mt-1">
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${user.Role === 'admin' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                    <i class="fas ${user.Role === 'admin' ? 'fa-shield-alt' : 'fa-user'} mr-1"></i>
+                    ${user.Role === 'admin' ? 'Administrateur' : 'Utilisateur'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="flex space-x-2">
+              <button onclick="viewUserDetails('${user.email}')" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                <i class="fas fa-eye mr-2"></i>Voir Prédictions
+              </button>
+              <button onclick="editUser('${user.email}')" class="bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-700 transition duration-300">
+                <i class="fas fa-edit mr-2"></i>Modifier
+              </button>
+              ${user.email !== currentAdmin.email ? `
+                <button onclick="deleteUser('${user.email}', '${user.name}')" class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition duration-300">
+                  <i class="fas fa-trash mr-2"></i>Supprimer
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Filter users
+    function filterUsers() {
+      const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+      filteredUsers = allUsers.filter(user => 
+        user.name.toLowerCase().includes(searchTerm) || 
+        user.email.toLowerCase().includes(searchTerm)
+      );
+      displayUsers();
+    }
+
+    // Load predictions
+    async function loadPredictions() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:7777/admin/results?limit=100', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          allPredictions = data.results;
+          filteredPredictions = allPredictions;
+          displayPredictions();
+        } else {
+          showNotification('Erreur lors du chargement des prédictions', 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion lors du chargement des prédictions', 'error');
+      }
+    }
+
+    // Display predictions
+    function displayPredictions() {
+      const predictionsList = document.getElementById('predictionsList');
+      
+      if (filteredPredictions.length === 0) {
+        predictionsList.innerHTML = `
+          <div class="text-center py-12 bg-white rounded-2xl shadow-xl">
+            <i class="fas fa-chart-line text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Aucune prédiction trouvée</h3>
+            <p class="text-gray-600">Aucune prédiction ne correspond à vos critères</p>
+          </div>
+        `;
+        return;
+      }
+      
+      predictionsList.innerHTML = filteredPredictions.map(pred => {
+        const createdDate = new Date(pred.created_at).toLocaleDateString('fr-FR');
+        const createdTime = new Date(pred.created_at).toLocaleTimeString('fr-FR');
+        const predictionResult = pred.prediction || 'Unknown';
+        const predictionData = pred.prediction_data || {};
+        const bmi = predictionData.Weight && predictionData.Height 
+          ? (predictionData.Weight / (predictionData.Height * predictionData.Height)).toFixed(1)
+          : 'N/A';
+        
+        const categories = {
+          'Insufficient_Weight': { color: 'text-blue-600', bg: 'bg-blue-100', desc: 'Poids Insuffisant' },
+          'Normal_Weight': { color: 'text-green-600', bg: 'bg-green-100', desc: 'Poids Normal' },
+          'Overweight_Level_I': { color: 'text-yellow-600', bg: 'bg-yellow-100', desc: 'Surpoids Niveau I' },
+          'Overweight_Level_II': { color: 'text-orange-600', bg: 'bg-orange-100', desc: 'Surpoids Niveau II' },
+          'Obesity_Type_I': { color: 'text-red-600', bg: 'bg-red-100', desc: 'Obésité Type I' },
+          'Obesity_Type_II': { color: 'text-red-700', bg: 'bg-red-200', desc: 'Obésité Type II' },
+          'Obesity_Type_III': { color: 'text-red-800', bg: 'bg-red-300', desc: 'Obésité Type III' }
+        };
+        
+        const category = categories[predictionResult] || { color: 'text-gray-600', bg: 'bg-gray-100', desc: predictionResult };
+        
+        return `
+          <div class="card-hover bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h4 class="text-lg font-semibold text-gray-900">${pred.user_id}</h4>
+                <p class="text-sm text-gray-600">${createdDate} à ${createdTime}</p>
+              </div>
+              <div class="text-right">
+                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${category.bg} ${category.color} mb-2">
+                  ${category.desc}
+                </div>
+                <p class="text-sm text-gray-600">IMC: ${bmi}</p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div class="flex justify-between">
+                <span class="font-medium text-gray-600">Genre:</span>
+                <span class="text-gray-900">${predictionData.Gender === 'Male' ? 'Homme' : 'Femme'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="font-medium text-gray-600">Âge:</span>
+                <span class="text-gray-900">${predictionData.Age || 'N/A'} ans</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="font-medium text-gray-600">Taille:</span>
+                <span class="text-gray-900">${predictionData.Height || 'N/A'}m</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="font-medium text-gray-600">Poids:</span>
+                <span class="text-gray-900">${predictionData.Weight || 'N/A'}kg</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Filter predictions
+    function filterPredictions() {
+      const categoryFilter = document.getElementById('predictionFilter').value;
+      filteredPredictions = allPredictions.filter(pred => {
+        if (categoryFilter && pred.prediction !== categoryFilter) {
+          return false;
+        }
+        return true;
+      });
+      displayPredictions();
+    }
+
+    // View user details
+    async function viewUserDetails(userEmail) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/admin/user/${userEmail}/results`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showUserModal(userEmail, data.results);
+        } else {
+          showNotification('Erreur lors du chargement des détails de l\'utilisateur', 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion', 'error');
+      }
+    }
+
+    // Show user modal
+    function showUserModal(userEmail, predictions) {
+      const modal = document.getElementById('userModal');
+      const content = document.getElementById('userDetailsContent');
+      
+      content.innerHTML = `
+        <div class="mb-6">
+          <h4 class="text-xl font-semibold text-gray-900 mb-2">${userEmail}</h4>
+          <p class="text-gray-600">${predictions.length} prédiction${predictions.length > 1 ? 's' : ''}</p>
+        </div>
+        
+        <div class="space-y-4 max-h-96 overflow-y-auto">
+          ${predictions.map(pred => {
+            const createdDate = new Date(pred.created_at).toLocaleDateString('fr-FR');
+            const createdTime = new Date(pred.created_at).toLocaleTimeString('fr-FR');
+            const predictionResult = pred.prediction || 'Unknown';
+            const predictionData = pred.prediction_data || {};
+            const bmi = predictionData.Weight && predictionData.Height 
+              ? (predictionData.Weight / (predictionData.Height * predictionData.Height)).toFixed(1)
+              : 'N/A';
+            
+            const categories = {
+              'Insufficient_Weight': { color: 'text-blue-600', bg: 'bg-blue-100', desc: 'Poids Insuffisant' },
+              'Normal_Weight': { color: 'text-green-600', bg: 'bg-green-100', desc: 'Poids Normal' },
+              'Overweight_Level_I': { color: 'text-yellow-600', bg: 'bg-yellow-100', desc: 'Surpoids Niveau I' },
+              'Overweight_Level_II': { color: 'text-orange-600', bg: 'bg-orange-100', desc: 'Surpoids Niveau II' },
+              'Obesity_Type_I': { color: 'text-red-600', bg: 'bg-red-100', desc: 'Obésité Type I' },
+              'Obesity_Type_II': { color: 'text-red-700', bg: 'bg-red-200', desc: 'Obésité Type II' },
+              'Obesity_Type_III': { color: 'text-red-800', bg: 'bg-red-300', desc: 'Obésité Type III' }
+            };
+            
+            const category = categories[predictionResult] || { color: 'text-gray-600', bg: 'bg-gray-100', desc: predictionResult };
+            
+            return `
+              <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex justify-between items-start mb-2">
+                  <div>
+                    <p class="text-sm text-gray-600">${createdDate} à ${createdTime}</p>
+                  </div>
+                  <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${category.bg} ${category.color}">
+                    ${category.desc}
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                  <div><span class="font-medium">Genre:</span> ${predictionData.Gender === 'Male' ? 'Homme' : 'Femme'}</div>
+                  <div><span class="font-medium">Âge:</span> ${predictionData.Age || 'N/A'} ans</div>
+                  <div><span class="font-medium">Taille:</span> ${predictionData.Height || 'N/A'}m</div>
+                  <div><span class="font-medium">Poids:</span> ${predictionData.Weight || 'N/A'}kg</div>
+                  <div><span class="font-medium">IMC:</span> ${bmi}</div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+      
+      modal.classList.remove('hidden');
+    }
+
+    // Close user modal
+    function closeUserModal() {
+      document.getElementById('userModal').classList.add('hidden');
+    }
+
+    // Edit user
+    function editUser(userEmail) {
+      window.location.href = `/admin/users/edit/${userEmail}`;
+    }
+
+    // Variables for confirmation modal
+    let pendingDeleteUser = null;
+
+    // Delete user
+    function deleteUser(userEmail, userName) {
+      pendingDeleteUser = { email: userEmail, name: userName };
+      
+      // Update modal content
+      document.getElementById('confirmationTitle').textContent = 'Confirmer la suppression';
+      document.getElementById('confirmationMessage').textContent = `Êtes-vous sûr de vouloir supprimer l'utilisateur "${userName}" ?`;
+      
+      // Show modal
+      document.getElementById('confirmationModal').classList.remove('hidden');
+    }
+
+    // Confirm delete
+    async function confirmDelete() {
+      if (!pendingDeleteUser) return;
+      
+      const { email: userEmail, name: userName } = pendingDeleteUser;
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:7777/admin/users/${userEmail}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          showNotification('Utilisateur supprimé avec succès!', 'success');
+          // Reload users list
+          loadUsers();
+        } else {
+          showNotification('Erreur: ' + data.error, 'error');
+        }
+      } catch (error) {
+        showNotification('Erreur de connexion: ' + error.message, 'error');
+      } finally {
+        closeConfirmationModal();
+        pendingDeleteUser = null;
+      }
+    }
+
+    // Close confirmation modal
+    function closeConfirmationModal() {
+      document.getElementById('confirmationModal').classList.add('hidden');
+      pendingDeleteUser = null;
+    }
+
+    // Close confirmation modal on backdrop click
+    function closeConfirmationModalOnBackdrop(event) {
+      if (event.target === event.currentTarget) {
+        closeConfirmationModal();
+      }
+    }
+
+    // Handle escape key
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeConfirmationModal();
+      }
+    });
+
+    // Refresh functions
+    function refreshUsers() {
+      loadUsers();
+    }
+
+    function refreshPredictions() {
+      loadPredictions();
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
+
+    // Notification system
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+      const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+      
+      notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${bgColor} text-white`;
+      notification.innerHTML = `
+        <div class="flex items-center">
+          <i class="fas ${icon} mr-2"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
