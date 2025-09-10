@@ -438,7 +438,7 @@
     async function loadUserStats() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:7777/predictions', {
+        const response = await fetch('http://localhost:7777/results', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -485,7 +485,7 @@
       
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:7777/predictions', {
+        const response = await fetch('http://localhost:7777/results', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -495,7 +495,7 @@
         const data = await response.json();
         
         if (response.ok) {
-          displayHistory(data.predictions);
+          displayHistory(data.results);
         } else {
           historyContent.innerHTML = '<div class="text-center text-red-600"><p>Erreur lors du chargement de l\'historique</p></div>';
         }
@@ -546,13 +546,15 @@
             ${predictions.map((pred, index) => {
               const createdDate = new Date(pred.created_at).toLocaleDateString('fr-FR');
               const createdTime = new Date(pred.created_at).toLocaleTimeString('fr-FR');
-              const prediction = pred.prediction_data;
+              const predictionData = pred.prediction_data || {};
               
               // Calculate BMI
-              const bmi = (prediction.Weight / (prediction.Height * prediction.Height)).toFixed(1);
+              const bmi = predictionData.Weight && predictionData.Height 
+                ? (predictionData.Weight / (predictionData.Height * predictionData.Height)).toFixed(1)
+                : 'N/A';
               
               // Get prediction result
-              const predictionResult = prediction.prediction || 'Unknown';
+              const predictionResult = pred.prediction || 'Unknown';
               const categories = {
                 'Insufficient_Weight': { color: 'text-blue-600', bg: 'bg-blue-100', desc: 'Poids Insuffisant' },
                 'Normal_Weight': { color: 'text-green-600', bg: 'bg-green-100', desc: 'Poids Normal' },
@@ -638,7 +640,7 @@
     async function loadStatistics() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:7777/predictions', {
+        const response = await fetch('http://localhost:7777/results', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -648,7 +650,7 @@
         const data = await response.json();
         
         if (response.ok) {
-          displayStatistics(data.predictions);
+          displayStatistics(data.results);
         } else {
           showNotification('Erreur lors du chargement des statistiques', 'error');
         }
@@ -706,8 +708,10 @@
       let totalBMI = 0;
 
       predictions.forEach((pred, index) => {
-        const prediction = pred.prediction_data;
-        const bmi = prediction.Weight / (prediction.Height * prediction.Height);
+        const predictionData = pred.prediction_data || {};
+        const bmi = predictionData.Weight && predictionData.Height 
+          ? predictionData.Weight / (predictionData.Height * predictionData.Height)
+          : 0;
         
         // BMI calculations
         totalBMI += bmi;
@@ -715,7 +719,7 @@
         stats.bmiRange.max = Math.max(stats.bmiRange.max, bmi);
         
         // Category distribution
-        const category = prediction.prediction || 'Unknown';
+        const category = pred.prediction || 'Unknown';
         stats.categoryDistribution[category] = (stats.categoryDistribution[category] || 0) + 1;
         
         // BMI trend (last 10 predictions)
@@ -1204,7 +1208,7 @@
     async function viewPredictionDetails(predictId) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+        const response = await fetch(`http://localhost:7777/results/${predictId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -1246,22 +1250,22 @@
             <div class="bg-gray-50 rounded-lg p-4">
               <h4 class="font-semibold mb-2">Données de Santé</h4>
               <div class="grid grid-cols-2 gap-2 text-sm">
-                <div>Genre: ${prediction.prediction_data.Gender}</div>
-                <div>Âge: ${prediction.prediction_data.Age} ans</div>
-                <div>Taille: ${prediction.prediction_data.Height}m</div>
-                <div>Poids: ${prediction.prediction_data.Weight}kg</div>
-                <div>Antécédents familiaux: ${prediction.prediction_data.family_history_with_overweight}</div>
-                <div>Aliments caloriques: ${prediction.prediction_data.FAVC}</div>
-                <div>Légumes: ${prediction.prediction_data.FCVC}</div>
-                <div>Repas principaux: ${prediction.prediction_data.NCP}</div>
-                <div>Collations: ${prediction.prediction_data.CAEC}</div>
-                <div>Fumeur: ${prediction.prediction_data.SMOKE}</div>
-                <div>Eau: ${prediction.prediction_data.CH2O}</div>
-                <div>Surveillance calories: ${prediction.prediction_data.SCC}</div>
-                <div>Activité physique: ${prediction.prediction_data.FAF}</div>
-                <div>Temps écrans: ${prediction.prediction_data.TUE}</div>
-                <div>Alcool: ${prediction.prediction_data.CALC}</div>
-                <div>Transport: ${prediction.prediction_data.MTRANS}</div>
+                <div>Genre: ${pred.prediction_data?.Gender || 'N/A'}</div>
+                <div>Âge: ${pred.prediction_data?.Age || 'N/A'} ans</div>
+                <div>Taille: ${pred.prediction_data?.Height || 'N/A'}m</div>
+                <div>Poids: ${pred.prediction_data?.Weight || 'N/A'}kg</div>
+                <div>Antécédents familiaux: ${pred.prediction_data?.family_history_with_overweight || 'N/A'}</div>
+                <div>Aliments caloriques: ${pred.prediction_data?.FAVC || 'N/A'}</div>
+                <div>Légumes: ${pred.prediction_data?.FCVC || 'N/A'}</div>
+                <div>Repas principaux: ${pred.prediction_data?.NCP || 'N/A'}</div>
+                <div>Collations: ${pred.prediction_data?.CAEC || 'N/A'}</div>
+                <div>Fumeur: ${pred.prediction_data?.SMOKE || 'N/A'}</div>
+                <div>Eau: ${pred.prediction_data?.CH2O || 'N/A'}</div>
+                <div>Surveillance calories: ${pred.prediction_data?.SCC || 'N/A'}</div>
+                <div>Activité physique: ${pred.prediction_data?.FAF || 'N/A'}</div>
+                <div>Temps écrans: ${pred.prediction_data?.TUE || 'N/A'}</div>
+                <div>Alcool: ${pred.prediction_data?.CALC || 'N/A'}</div>
+                <div>Transport: ${pred.prediction_data?.MTRANS || 'N/A'}</div>
               </div>
             </div>
           </div>
@@ -1275,7 +1279,7 @@
     async function duplicatePrediction(predictId) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+        const response = await fetch(`http://localhost:7777/results/${predictId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -1286,7 +1290,7 @@
         
         if (response.ok) {
           // Fill form with prediction data
-          const pred = data.prediction.prediction_data;
+          const pred = data.result.prediction_data;
           document.getElementById('Gender').value = pred.Gender;
           document.getElementById('Age').value = pred.Age;
           document.getElementById('Height').value = pred.Height;
@@ -1327,9 +1331,9 @@
         })
         .then(response => response.json())
         .then(data => {
-          if (data.predictions) {
+          if (data.results) {
             // Create CSV content
-            const csvContent = createCSV(data.predictions);
+            const csvContent = createCSV(data.results);
             
             // Download CSV
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1390,7 +1394,7 @@
       
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+        const response = await fetch(`http://localhost:7777/results/${predictId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`

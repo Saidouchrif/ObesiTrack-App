@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from models.User import create_user, authenticate_user
 from models.Auth import get_current_user
 from models.Predict import create_predict, get_user_predictions, get_prediction_by_id, delete_prediction
+from models.Result import save_prediction_result, get_user_results, get_result_by_predict_id, get_all_results_for_admin, delete_result
 
 app = FastAPI()
 
@@ -146,11 +147,25 @@ def create_prediction(prediction_data: PredictionData, current_user: dict = Depe
             if ml_response.status_code == 200:
                 ml_result = ml_response.json()
                 
+                # Sauvegarder le résultat de la prédiction
+                prediction = ml_result.get("prediction", "Unknown")
+                probabilities = ml_result.get("probabilities", {})
+                
+                save_result = save_prediction_result(
+                    user_id=current_user['email'],
+                    predict_id=result["predict_id"],
+                    prediction=prediction,
+                    probabilities=probabilities,
+                    prediction_data=predict_dict,
+                    ml_status="success"
+                )
+                
                 return {
                     "message": "Prédiction créée avec succès",
                     "predict_id": result["predict_id"],
-                    "prediction": ml_result.get("prediction", "Unknown"),
-                    "probabilities": ml_result.get("probabilities", {}),
+                    "result_id": save_result["result_id"],
+                    "prediction": prediction,
+                    "probabilities": probabilities,
                     "user_id": current_user['email'],
                     "ml_status": "success"
                 }
@@ -169,9 +184,20 @@ def create_prediction(prediction_data: PredictionData, current_user: dict = Depe
             prediction = random.choice(categories)
             probabilities = {cat: random.random() for cat in categories}
             
+            # Sauvegarder le résultat de la prédiction fallback
+            save_result = save_prediction_result(
+                user_id=current_user['email'],
+                predict_id=result["predict_id"],
+                prediction=prediction,
+                probabilities=probabilities,
+                prediction_data=predict_dict,
+                ml_status="fallback"
+            )
+            
             return {
                 "message": "Prédiction créée avec succès (mode fallback - API ML indisponible)",
                 "predict_id": result["predict_id"],
+                "result_id": save_result["result_id"],
                 "prediction": prediction,
                 "probabilities": probabilities,
                 "user_id": current_user['email'],
@@ -218,3 +244,59 @@ def delete_prediction_endpoint(predict_id: str, current_user: dict = Depends(get
         return result
     except Exception as e:
         return {"error": f"Erreur lors de la suppression de la prédiction: {str(e)}"}
+
+@app.get("/results")
+def get_results(current_user: dict = Depends(get_current_user), limit: int = 10):
+    """Récupérer les résultats de prédiction de l'utilisateur authentifié"""
+    try:
+        results = get_user_results(current_user['email'], limit)
+        return {
+            "results": results,
+            "count": len(results),
+            "user_id": current_user['email']
+        }
+    except Exception as e:
+        return {"error": f"Erreur lors de la récupération des résultats: {str(e)}"}
+
+@app.get("/results/{predict_id}")
+def get_result(predict_id: str, current_user: dict = Depends(get_current_user)):
+    """Récupérer un résultat de prédiction spécifique de l'utilisateur authentifié"""
+    try:
+        result = get_result_by_predict_id(predict_id, current_user['email'])
+        if result:
+            return {
+                "result": result,
+                "user_id": current_user['email']
+            }
+        else:
+            return {"error": "Résultat non trouvé ou non autorisé"}
+    except Exception as e:
+        return {"error": f"Erreur lors de la récupération du résultat: {str(e)}"}
+
+@app.delete("/results/{result_id}")
+def delete_result_endpoint(result_id: str, current_user: dict = Depends(get_current_user)):
+    """Supprimer un résultat de prédiction de l'utilisateur authentifié"""
+    try:
+        result = delete_result(result_id, current_user['email'])
+        return result
+    except Exception as e:
+        return {"error": f"Erreur lors de la suppression du résultat: {str(e)}"}
+
+@app.get("/admin/results")
+def get_all_results_admin(current_user: dict = Depends(get_current_user), limit: int = 50):
+    """Récupérer tous les résultats pour l'admin"""
+    try:
+        # Vérifier si l'utilisateur est admin
+        from models.Connection import collection
+        user = collection.find_one({"email": current_user['email']})
+        if not user or user.get("Role") != "admin":
+            return {"error": "Accès non autorisé - Admin requis"}
+        
+        results = get_all_results_for_admin(limit)
+        return {
+            "results": results,
+            "count": len(results),
+            "admin_user": current_user['email']
+        }
+    except Exception as e:
+        return {"error": f"Erreur lors de la récupération des résultats admin: {str(e)}"}

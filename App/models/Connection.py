@@ -10,6 +10,7 @@ try:
     dataBase = client[DB_NAME]
     collection = dataBase["Users"]
     collection_predict = dataBase["Predict"]
+    collection_result = dataBase["Result"]
     print("Connected to MongoDB successfully")
 except Exception as e:
     print("Error connecting to MongoDB:", e)

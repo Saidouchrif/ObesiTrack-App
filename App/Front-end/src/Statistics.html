@@ -236,7 +236,7 @@
     async function loadStatistics() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:7777/predictions', {
+        const response = await fetch('http://localhost:7777/results', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -246,7 +246,7 @@
         const data = await response.json();
         
         if (response.ok) {
-          predictionsData = data.predictions;
+          predictionsData = data.results;
           if (predictionsData.length === 0) {
             showEmptyState();
           } else {
@@ -308,8 +308,10 @@
       let totalBMI = 0;
 
       predictions.forEach((pred, index) => {
-        const prediction = pred.prediction_data;
-        const bmi = prediction.Weight / (prediction.Height * prediction.Height);
+        const predictionData = pred.prediction_data || {};
+        const bmi = predictionData.Weight && predictionData.Height 
+          ? predictionData.Weight / (predictionData.Height * predictionData.Height)
+          : 0;
         
         // BMI calculations
         totalBMI += bmi;
@@ -317,7 +319,7 @@
         stats.bmiRange.max = Math.max(stats.bmiRange.max, bmi);
         
         // Category distribution
-        const category = prediction.prediction || 'Unknown';
+        const category = pred.prediction || 'Unknown';
         stats.categoryDistribution[category] = (stats.categoryDistribution[category] || 0) + 1;
         
         // BMI trend (last 10 predictions)

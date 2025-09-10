@@ -181,7 +181,7 @@
     async function loadHistory() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:7777/predictions', {
+        const response = await fetch('http://localhost:7777/results', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -191,7 +191,7 @@
         const data = await response.json();
         
         if (response.ok) {
-          allPredictions = data.predictions;
+          allPredictions = data.results;
           if (allPredictions.length === 0) {
             showEmptyState();
           } else {
@@ -219,7 +219,7 @@
       
       filteredPredictions = allPredictions.filter(pred => {
         // Category filter
-        if (categoryFilter && pred.prediction_data.prediction !== categoryFilter) {
+        if (categoryFilter && pred.prediction !== categoryFilter) {
           return false;
         }
         
@@ -285,13 +285,14 @@
         const globalIndex = (currentPage - 1) * itemsPerPage + index + 1;
         const createdDate = new Date(pred.created_at).toLocaleDateString('fr-FR');
         const createdTime = new Date(pred.created_at).toLocaleTimeString('fr-FR');
-        const prediction = pred.prediction_data;
+        // Get prediction result from the result data
+        const predictionResult = pred.prediction || 'Unknown';
         
-        // Calculate BMI
-        const bmi = (prediction.Weight / (prediction.Height * prediction.Height)).toFixed(1);
-        
-        // Get prediction result
-        const predictionResult = prediction.prediction || 'Unknown';
+        // Calculate BMI from original prediction data
+        const predictionData = pred.prediction_data || {};
+        const bmi = predictionData.Weight && predictionData.Height 
+          ? (predictionData.Weight / (predictionData.Height * predictionData.Height)).toFixed(1)
+          : 'N/A';
         const categories = {
           'Insufficient_Weight': { color: 'text-blue-600', bg: 'bg-blue-100', desc: 'Poids Insuffisant' },
           'Normal_Weight': { color: 'text-green-600', bg: 'bg-green-100', desc: 'Poids Normal' },
@@ -322,19 +323,19 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
               <div class="flex justify-between">
                 <span class="font-medium text-gray-600">Genre:</span>
-                <span class="text-gray-900">${prediction.Gender === 'Male' ? 'Homme' : 'Femme'}</span>
+                <span class="text-gray-900">${predictionData.Gender === 'Male' ? 'Homme' : 'Femme'}</span>
               </div>
               <div class="flex justify-between">
                 <span class="font-medium text-gray-600">Âge:</span>
-                <span class="text-gray-900">${prediction.Age} ans</span>
+                <span class="text-gray-900">${predictionData.Age || 'N/A'} ans</span>
               </div>
               <div class="flex justify-between">
                 <span class="font-medium text-gray-600">Taille:</span>
-                <span class="text-gray-900">${prediction.Height}m</span>
+                <span class="text-gray-900">${predictionData.Height || 'N/A'}m</span>
               </div>
               <div class="flex justify-between">
                 <span class="font-medium text-gray-600">Poids:</span>
-                <span class="text-gray-900">${prediction.Weight}kg</span>
+                <span class="text-gray-900">${predictionData.Weight || 'N/A'}kg</span>
               </div>
             </div>
             
@@ -421,7 +422,7 @@
     async function viewPredictionDetails(predictId) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+        const response = await fetch(`http://localhost:7777/results/${predictId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -431,7 +432,7 @@
         const data = await response.json();
         
         if (response.ok) {
-          showPredictionModal(data.prediction);
+          showPredictionModal(data.result);
         } else {
           showNotification('Erreur lors du chargement des détails', 'error');
         }
@@ -539,7 +540,7 @@
     async function duplicatePrediction(predictId) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+        const response = await fetch(`http://localhost:7777/results/${predictId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -550,7 +551,7 @@
         
         if (response.ok) {
           // Redirect to dashboard with form pre-filled
-          const pred = data.prediction.prediction_data;
+          const pred = data.result.prediction_data;
           const formData = {
             Gender: pred.Gender,
             Age: pred.Age,
@@ -588,7 +589,7 @@
       
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/predictions/${predictId}`, {
+        const response = await fetch(`http://localhost:7777/results/${predictId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -634,15 +635,19 @@
       ];
       
       const rows = predictions.map(pred => {
-        const data = pred.prediction_data;
-        const bmi = (data.Weight / (data.Height * data.Height)).toFixed(1);
+        const data = pred.prediction_data || {};
+        const bmi = data.Weight && data.Height 
+          ? (data.Weight / (data.Height * data.Height)).toFixed(1)
+          : 'N/A';
         const date = new Date(pred.created_at).toLocaleString('fr-FR');
         
         return [
-          date, data.Gender, data.Age, data.Height, data.Weight, bmi,
-          data.family_history_with_overweight, data.FAVC, data.FCVC, data.NCP,
-          data.CAEC, data.SMOKE, data.CH2O, data.SCC, data.FAF, data.TUE,
-          data.CALC, data.MTRANS
+          date, data.Gender || 'N/A', data.Age || 'N/A', data.Height || 'N/A', 
+          data.Weight || 'N/A', bmi, data.family_history_with_overweight || 'N/A', 
+          data.FAVC || 'N/A', data.FCVC || 'N/A', data.NCP || 'N/A',
+          data.CAEC || 'N/A', data.SMOKE || 'N/A', data.CH2O || 'N/A', 
+          data.SCC || 'N/A', data.FAF || 'N/A', data.TUE || 'N/A',
+          data.CALC || 'N/A', data.MTRANS || 'N/A'
         ];
       });
       
