@@ -15,14 +15,9 @@ if __name__ == "__main__":
     print("=" * 60)
     
     try:
-        # Configuration sécurisée pour Docker
-        host = os.getenv("HOST", "127.0.0.1")  # Par défaut localhost, 0.0.0.0 pour Docker
-        if os.getenv("DOCKER_ENV") == "true":
-            host = "0.0.0.0"  # Nécessaire pour Docker
-        
         uvicorn.run(
             "obesity_api:app",
-            host=host,  # nosec B104
+            host="0.0.0.0",
             port=8000,
             reload=True,
             log_level="info"
