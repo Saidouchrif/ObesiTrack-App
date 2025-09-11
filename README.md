@@ -1,3 +1,5 @@
+# ObesiTrack-App
+ObesiTrack est une API sécurisée développée avec FastAPI et Docker, intégrant un modèle de Machine Learning pour prédire le risque d'obésité. Elle propose l'authentification JWT, la gestion des utilisateurs avec MongoDB, la sauvegarde des prédictions, et un déploiement portable via Docker Compose.
 # 🏥 ObesiTrack-App
 
 <div align="center">
@@ -660,14 +662,14 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 ## 👥 Équipe
 
-- **Développeur Principal** : [Saidouchrif](https://github.com/Saidouchrif)
+- **Développeur Principal** : [Said Ouchrif](https://github.com/Saidouchrif)
 - **Contributeurs** : Voir [CONTRIBUTORS.md](CONTRIBUTORS.md)
 
 ## 📞 Support
 
-- **Email** : support@obesitrack.com
+- **Email** : saidouchrif16@gmail.com
 - **Documentation** : [docs.obesitrack.com](https://docs.obesitrack.com)
-- **Issues** : [GitHub Issues](https://github.com/votre-username/ObesiTrack-App/issues)
+- **Issues** : [GitHub Issues](https://github.com/Saidouchrif/ObesiTrack-App/issues)
 
 ## 🙏 Remerciements
 

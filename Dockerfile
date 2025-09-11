@@ -1,35 +1,33 @@
-# -----------------------------
-# Étape 1 : Base Python
-# -----------------------------
-FROM python:3.10-slim
+# Utiliser Python 3.11 comme image de base
+FROM python:3.11-slim
 
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Installer dépendances système (Postgres client, build tools si besoin)
+# Installer les dépendances système nécessaires
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
+    gcc \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# -----------------------------
-# Étape 2 : Dépendances Python
-# -----------------------------
-# Copier requirements en premier pour profiter du cache Docker
+# Copier le fichier requirements.txt
 COPY requirements.txt .
 
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Installer les dépendances Python
+RUN pip install --no-cache-dir -r requirements.txt
 
-# -----------------------------
-# Étape 3 : Copier le code
-# -----------------------------
+# Copier tout le code de l'application
 COPY . .
 
-# -----------------------------
-# Étape 4 : Lancer l’application
-# -----------------------------
-EXPOSE 8000
+# Créer les répertoires nécessaires
+RUN mkdir -p /app/logs
 
-# Commande de démarrage avec uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Exposer les ports
+EXPOSE 7777 8000
+
+# Script de démarrage pour gérer les deux services
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
+# Commande par défaut
+CMD ["/app/start.sh"]
