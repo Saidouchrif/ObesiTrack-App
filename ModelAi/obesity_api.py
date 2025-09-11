@@ -658,4 +658,9 @@ if __name__ == "__main__":
     print("📖 Documentation: http://localhost:8000/docs")
     print("=" * 50)
 
-    uvicorn.run("obesity_api:app", host="0.0.0.0", port=8000, reload=True)
+    # Configuration sécurisée pour Docker
+    host = os.getenv("HOST", "127.0.0.1")  # Par défaut localhost, 0.0.0.0 pour Docker
+    if os.getenv("DOCKER_ENV") == "true":
+        host = "0.0.0.0"  # Nécessaire pour Docker
+    
+    uvicorn.run("obesity_api:app", host=host, port=8000, reload=True)  # nosec B104

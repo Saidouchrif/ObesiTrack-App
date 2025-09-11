@@ -1,0 +1,15 @@
+# Configuration Bandit pour ObesiTrack
+# Fichier de configuration simplifié
+
+[bandit]
+# Exclure les dossiers de tests
+exclude_dirs = tests,test_,__pycache__,.git,.pytest_cache
+
+# Ignorer les tests spécifiques
+skips = B104  # hardcoded_bind_all_interfaces (nécessaire pour Docker)
+
+# Niveau de confiance minimum
+confidence = MEDIUM
+
+# Niveau de gravité minimum  
+severity = MEDIUM

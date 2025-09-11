@@ -28,3 +28,6 @@ python-multipart==0.0.6
 
 # HTTP requests
 requests==2.31.0
+
+# Sécurité - Mise à jour setuptools pour corriger les vulnérabilités
+setuptools>=78.1.1
