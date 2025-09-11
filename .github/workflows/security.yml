@@ -47,7 +47,7 @@ jobs:
         semgrep --config=auto .
         
     - name: 📊 Upload des rapports de sécurité
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-reports
         path: |
@@ -80,7 +80,7 @@ jobs:
         pip-audit
         
     - name: 📊 Upload du rapport d'audit
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dependency-audit-report
         path: pip-audit-report.json
@@ -128,7 +128,7 @@ jobs:
         output: 'trivy-results.sarif'
         
     - name: 📊 Upload des résultats Trivy
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: 'trivy-results.sarif'
 
