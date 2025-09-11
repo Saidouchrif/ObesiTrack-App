@@ -1,0 +1,34 @@
+# Code Owners pour ObesiTrack
+# https://github.com/Saidouchrif/ObesiTrack-App.git
+
+# Propriétaire global du projet
+* @Saidouchrif
+
+# Backend et API
+/App/Back-end/ @Saidouchrif
+/App/models/ @Saidouchrif
+
+# Frontend
+/App/Front-end/ @Saidouchrif
+
+# Modèle IA et ML
+/ModelAi/ @Saidouchrif
+
+# Configuration Docker
+Dockerfile @Saidouchrif
+docker-compose.yml @Saidouchrif
+.dockerignore @Saidouchrif
+
+# Configuration GitHub Actions
+/.github/ @Saidouchrif
+
+# Documentation
+README.md @Saidouchrif
+*.md @Saidouchrif
+
+# Configuration du projet
+requirements.txt @Saidouchrif
+requirements-dev.txt @Saidouchrif
+pyproject.toml @Saidouchrif
+pytest.ini @Saidouchrif
+.pre-commit-config.yaml @Saidouchrif
