@@ -1,33 +1,34 @@
-# Utiliser Python 3.11 comme image de base
-FROM python:3.11-slim
+# Dockerfile pour Hugging Face Spaces
+# Documentation: https://huggingface.co/docs/hub/spaces-sdks-docker
+
+FROM python:3.11
+
+# Créer un utilisateur non-root pour la sécurité
+RUN useradd -m -u 1000 user
+USER user
+ENV PATH="/home/user/.local/bin:$PATH"
 
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Installer les dépendances système nécessaires
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copier le fichier requirements.txt
-COPY requirements.txt .
-
-# Installer les dépendances Python
-RUN pip install --no-cache-dir -r requirements.txt
+# Copier et installer les dépendances
+COPY --chown=user ./requirements.txt requirements.txt
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Copier tout le code de l'application
-COPY . .
+COPY --chown=user . /app
 
 # Créer les répertoires nécessaires
 RUN mkdir -p /app/logs
 
-# Exposer les ports
-EXPOSE 7777 8000
+# Exposer le port 7860 (requis par Hugging Face Spaces)
+EXPOSE 7860
 
-# Script de démarrage pour gérer les deux services
-COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
+# Variables d'environnement
+ENV PYTHONPATH=/app
+ENV API_HOST=0.0.0.0
+ENV API_PORT=7860
+ENV ML_API_PORT=8000
 
 # Commande par défaut
-CMD ["/app/start.sh"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
