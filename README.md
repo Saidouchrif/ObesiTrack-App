@@ -8,6 +8,7 @@ ObesiTrack est une API sécurisée développée avec FastAPI et Docker, intégra
 
 **Une application complète de prédiction d'obésité basée sur l'IA**
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Hugging%20Face%20Spaces-blue?style=for-the-badge&logo=huggingface)](https://huggingface.co/spaces/SaidOuchrif/ObesiTrack-App)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongodb.com)
@@ -196,6 +197,12 @@ docker run -p 7777:7777 -p 8000:8000 obesitrack-app
 
 ### 5️⃣ Accès à l'application
 
+#### 🌐 Version Live (Hugging Face Spaces)
+- **Application Live** : [https://huggingface.co/spaces/SaidOuchrif/ObesiTrack-App](https://huggingface.co/spaces/SaidOuchrif/ObesiTrack-App)
+- **Interface Web** : Accessible directement via le lien ci-dessus
+- **API Documentation** : Disponible via l'interface web
+
+#### 💻 Version Locale
 - **Interface Web** : http://localhost:7777
 - **API Documentation** : http://localhost:7777/docs
 - **API ML** : http://localhost:8000/docs
@@ -541,6 +548,85 @@ git push
 
 # L'application se redémarre automatiquement sur HF Spaces
 ```
+
+### 📝 Description Hugging Face Spaces
+
+**ObesiTrack-App** est une application complète de prédiction d'obésité déployée sur Hugging Face Spaces. Cette plateforme cloud permet d'accéder à l'application 24/7 sans installation locale.
+
+#### 🌟 Avantages de Hugging Face Spaces
+
+- **🚀 Déploiement Instantané** : Application accessible immédiatement via navigateur
+- **☁️ Infrastructure Cloud** : Pas besoin de serveur local ou de configuration complexe
+- **🔄 Mise à Jour Automatique** : Redémarrage automatique lors des modifications
+- **📊 Monitoring Intégré** : Logs et métriques disponibles directement
+- **🌍 Accessibilité Globale** : Disponible depuis n'importe où dans le monde
+- **💰 Gratuit** : Utilisation gratuite pour les projets open source
+
+#### 🎯 Fonctionnalités Disponibles sur HF Spaces
+
+L'application déployée inclut toutes les fonctionnalités de la version locale :
+
+1. **🔐 Authentification Complète**
+   - Inscription et connexion utilisateur
+   - Gestion des sessions avec JWT
+   - Stockage en mémoire pour la démo
+
+2. **🤖 Prédiction d'Obésité Avancée**
+   - 7 catégories d'obésité prédites
+   - Modèles ML multiples (Random Forest, Gradient Boosting, SVM, Logistic Regression)
+   - Probabilités détaillées et recommandations personnalisées
+
+3. **📊 Dashboard Interactif**
+   - Interface utilisateur moderne et responsive
+   - Historique des prédictions
+   - Statistiques et graphiques
+   - Dashboard administrateur
+
+4. **🔧 API Complète**
+   - Endpoints REST pour toutes les fonctionnalités
+   - Documentation automatique
+   - Validation des données avec Pydantic
+
+#### 🚀 Comment Utiliser l'Application
+
+1. **Accès Direct** : Cliquez sur [https://huggingface.co/spaces/SaidOuchrif/ObesiTrack-App](https://huggingface.co/spaces/SaidOuchrif/ObesiTrack-App)
+2. **Inscription** : Créez votre compte utilisateur
+3. **Connexion** : Connectez-vous avec vos identifiants
+4. **Prédiction** : Remplissez le formulaire avec vos informations
+5. **Résultats** : Consultez votre prédiction et recommandations
+6. **Dashboard** : Suivez votre historique et statistiques
+
+#### 🔍 Monitoring et Logs
+
+L'application sur Hugging Face Spaces inclut :
+
+- **📈 Logs de Démarrage** : Affichage du statut de chaque service
+- **🔍 Endpoint de Santé** : `/health` pour vérifier l'état de l'application
+- **📊 Statut de l'API** : `/api/status` avec métriques détaillées
+- **⚠️ Gestion d'Erreurs** : Messages d'erreur clairs et informatifs
+
+#### 🛠️ Configuration Technique
+
+L'application est optimisée pour Hugging Face Spaces :
+
+```python
+# Configuration automatique
+os.environ.setdefault("API_HOST", "0.0.0.0")
+os.environ.setdefault("API_PORT", "7860")  # Port requis par HF
+os.environ.setdefault("ML_API_PORT", "8000")
+os.environ.setdefault("PYTHONPATH", str(app_dir))
+
+# Stockage en mémoire pour la démo
+users_db = {}
+predictions_db = {}
+```
+
+#### 📱 Compatibilité
+
+- **🌐 Navigateurs** : Chrome, Firefox, Safari, Edge
+- **📱 Appareils** : Desktop, tablette, mobile
+- **🖥️ Systèmes** : Windows, macOS, Linux
+- **📶 Connexion** : Fonctionne avec une connexion internet standard
 
 ## 🐳 Déploiement Docker Local
 
