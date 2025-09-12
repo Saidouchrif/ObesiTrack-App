@@ -27,6 +27,7 @@ ObesiTrack est une API sécurisée développée avec FastAPI et Docker, intégra
 - [📊 API Documentation](#-api-documentation)
 - [🤖 Modèle de Machine Learning](#-modèle-de-machine-learning)
 - [🎨 Interface utilisateur](#-interface-utilisateur)
+- [🚀 Déploiement sur Hugging Face Spaces](#-déploiement-sur-hugging-face-spaces)
 - [🐳 Déploiement Docker](#-déploiement-docker)
 - [🔒 Sécurité](#-sécurité)
 - [📈 Monitoring et Analytics](#-monitoring-et-analytics)
@@ -45,6 +46,7 @@ ObesiTrack est une API sécurisée développée avec FastAPI et Docker, intégra
 - **Sécurité renforcée** : Authentification JWT et gestion des rôles
 - **Scalabilité** : Architecture modulaire prête pour la production
 - **Traçabilité** : Historique complet des prédictions et résultats
+- **Déploiement Cloud** : Application accessible 24/7 sur Hugging Face Spaces
 
 ## ✨ Fonctionnalités
 
@@ -417,7 +419,130 @@ Content-Type: application/json
 - **JavaScript** : Interactivité et validation
 - **Bootstrap** : Framework CSS responsive
 
-## 🐳 Déploiement Docker
+## 🚀 Déploiement sur Hugging Face Spaces
+
+### 🌐 Application Live
+
+**ObesiTrack-App** est déployé et accessible sur Hugging Face Spaces :
+
+🔗 **[https://huggingface.co/spaces/SaidOuchrif/ObesiTrack-App](https://huggingface.co/spaces/SaidOuchrif/ObesiTrack-App)**
+
+### 📋 Fonctionnalités Disponibles
+
+L'application déployée sur Hugging Face Spaces inclut :
+
+- ✅ **Interface Web Complète** : Toutes les pages HTML (Home, Login, Register, Dashboard, Predict, History, Statistics, Admin)
+- ✅ **API FastAPI** : Endpoints complets pour l'authentification et les prédictions
+- ✅ **API Machine Learning** : Modèles ML intégrés pour la prédiction d'obésité
+- ✅ **Authentification** : Système de connexion/inscription avec stockage en mémoire
+- ✅ **Prédictions en Temps Réel** : Formulaire de prédiction avec résultats instantanés
+- ✅ **Dashboard Utilisateur** : Interface personnalisée pour chaque utilisateur
+- ✅ **Dashboard Admin** : Gestion administrative complète
+- ✅ **Responsive Design** : Interface adaptée à tous les écrans
+
+### 🔧 Configuration Hugging Face
+
+L'application est configurée spécifiquement pour Hugging Face Spaces :
+
+```python
+# Configuration automatique pour HF Spaces
+os.environ.setdefault("API_HOST", "0.0.0.0")
+os.environ.setdefault("API_PORT", "7860")  # Port requis par HF
+os.environ.setdefault("ML_API_PORT", "8000")
+os.environ.setdefault("PYTHONPATH", str(app_dir))
+```
+
+### 🐳 Dockerfile Optimisé
+
+Le Dockerfile est optimisé pour Hugging Face Spaces :
+
+```dockerfile
+# Base image Python
+FROM python:3.10-slim
+
+# Installation des dépendances système
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Configuration du répertoire de travail
+WORKDIR /app
+
+# Copie des fichiers de l'application
+COPY . .
+
+# Installation des dépendances Python
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Exposition du port 7860 (requis par HF Spaces)
+EXPOSE 7860
+
+# Script de démarrage
+COPY start_hf.sh /app/start_hf.sh
+RUN chmod +x /app/start_hf.sh
+
+# Commande de démarrage
+CMD ["/app/start_hf.sh"]
+```
+
+### 🚀 Démarrage Automatique
+
+L'application démarre automatiquement avec :
+
+1. **API Machine Learning** : Démarre sur le port 8000
+2. **API Principale** : Démarre sur le port 7860
+3. **Interface Web** : Accessible via le navigateur
+4. **Fichiers Statiques** : CSS, JS, images servis automatiquement
+
+### 📊 Endpoints Disponibles
+
+| Endpoint | Description | Statut |
+|----------|-------------|---------|
+| `GET /` | Page d'accueil | ✅ |
+| `GET /login` | Page de connexion | ✅ |
+| `GET /register` | Page d'inscription | ✅ |
+| `GET /dashboard` | Dashboard utilisateur | ✅ |
+| `GET /predict` | Page de prédiction | ✅ |
+| `GET /history` | Historique des prédictions | ✅ |
+| `GET /statistics` | Statistiques | ✅ |
+| `GET /admin` | Dashboard administrateur | ✅ |
+| `POST /signup` | Inscription utilisateur | ✅ |
+| `POST /login` | Connexion utilisateur | ✅ |
+| `POST /predict` | Créer une prédiction | ✅ |
+| `GET /health` | Vérification de santé | ✅ |
+| `GET /api/status` | Statut de l'API | ✅ |
+
+### 🔍 Monitoring et Logs
+
+L'application inclut un système de monitoring complet :
+
+- **Logs de démarrage** : Affichage du statut de chaque service
+- **Vérification de santé** : Endpoint `/health` pour le monitoring
+- **Statut de l'API** : Endpoint `/api/status` avec métriques détaillées
+- **Gestion d'erreurs** : Messages d'erreur clairs et informatifs
+
+### 🎯 Utilisation sur Hugging Face
+
+1. **Accès Direct** : Cliquez sur le lien pour accéder à l'application
+2. **Inscription** : Créez un compte utilisateur
+3. **Connexion** : Connectez-vous avec vos identifiants
+4. **Prédiction** : Utilisez le formulaire de prédiction
+5. **Dashboard** : Consultez vos résultats et historique
+
+### 🔄 Mise à Jour
+
+L'application se met à jour automatiquement lors des push Git :
+
+```bash
+# Mise à jour du code
+git add .
+git commit -m "Update application"
+git push
+
+# L'application se redémarre automatiquement sur HF Spaces
+```
+
+## 🐳 Déploiement Docker Local
 
 ### 📦 Construction de l'image
 
