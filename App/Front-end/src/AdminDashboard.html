@@ -537,7 +537,7 @@
     async function loadStatistics() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:7777/admin/statistics', {
+        const response = await fetch('//admin/statistics', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -836,7 +836,7 @@
     async function loadUsers() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:7777/admin/users', {
+        const response = await fetch('//admin/users', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -922,7 +922,7 @@
     async function loadPredictions() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:7777/admin/results?limit=100', {
+        const response = await fetch('//admin/results?limit=100', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -1033,7 +1033,7 @@
     async function viewUserDetails(userEmail) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/admin/user/${userEmail}/results`, {
+        const response = await fetch(`//admin/user/${userEmail}/results`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -1144,7 +1144,7 @@
       
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/admin/users/${userEmail}`, {
+        const response = await fetch(`//admin/users/${userEmail}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`

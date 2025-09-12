@@ -192,7 +192,7 @@
     async function loadHistory() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:7777/results', {
+        const response = await fetch('//results', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -433,7 +433,7 @@
     async function viewPredictionDetails(predictId) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/results/${predictId}`, {
+        const response = await fetch(`//results/${predictId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -551,7 +551,7 @@
     async function duplicatePrediction(predictId) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/results/${predictId}`, {
+        const response = await fetch(`//results/${predictId}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -600,7 +600,7 @@
       
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/results/${predictId}`, {
+        const response = await fetch(`//results/${predictId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`

@@ -295,7 +295,7 @@
       
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:7777/admin/users', {
+        const response = await fetch('//admin/users', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

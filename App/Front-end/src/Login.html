@@ -180,7 +180,7 @@
       loadingOverlay.classList.remove('hidden');
       
       try {
-        const response = await fetch('http://localhost:7777/login', {
+        const response = await fetch('/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -217,7 +217,14 @@
           showNotification('Erreur de connexion: ' + data.detail, 'error');
         }
       } catch (error) {
-        showNotification('Erreur de connexion: ' + error.message, 'error');
+        console.error('Login error:', error);
+        let errorMessage = 'Erreur de connexion';
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          errorMessage = 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.';
+        } else if (error.message) {
+          errorMessage = 'Erreur de connexion: ' + error.message;
+        }
+        showNotification(errorMessage, 'error');
       } finally {
         loadingOverlay.classList.add('hidden');
       }

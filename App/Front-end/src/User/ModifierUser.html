@@ -368,7 +368,7 @@
     async function loadUserData() {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/admin/users/${userEmail}`, {
+        const response = await fetch(`//admin/users/${userEmail}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -410,7 +410,7 @@
         const token = localStorage.getItem('token');
         
         // Load predictions count
-        const predictionsResponse = await fetch(`http://localhost:7777/admin/user/${userEmail}/results`, {
+        const predictionsResponse = await fetch(`//admin/user/${userEmail}/results`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -482,7 +482,7 @@
       
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/admin/users/${userEmail}`, {
+        const response = await fetch(`//admin/users/${userEmail}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -531,7 +531,7 @@
       
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:7777/admin/users/${userEmail}`, {
+        const response = await fetch(`//admin/users/${userEmail}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`
